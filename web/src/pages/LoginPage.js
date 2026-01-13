@@ -160,9 +160,9 @@ function LoginPage() {
               </Button>
             </Card>
 
-            <Typography align="center" sx={{ mt: 3, color: '#133458' }}>
+            <Typography align="center" sx={{ mt: 3, color: '#014769' }}>
               {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-              <Button onClick={() => navigate(isSignUp ? '/login' : '/signup')} sx={{ color: '#133458' }}>
+              <Button onClick={() => navigate(isSignUp ? '/login' : '/signup')} sx={{ color: '#014769' }}>
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </Button>
             </Typography>

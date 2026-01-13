@@ -28,14 +28,14 @@ export default function PassengerMatchesList({ matches }) {
                 }`}>
                   {match.status.charAt(0).toUpperCase() + match.status.slice(1)}
                 </span>
-                <span className="text-green-600 font-bold text-xs">{(match.similarity * 100).toFixed(0)}%</span>
+                <span className="text-green-100 font-bold text-xs">{(match.similarity * 100).toFixed(0)}%</span>
               </div>
 
               {/* Progress Bar */}
               <div className="mb-4">
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-green-600 h-2 rounded-full transition-all"
+                    className="bg-green-100 h-2 rounded-full transition-all"
                     style={{ width: `${match.similarity * 100}%` }}
                   />
                 </div>

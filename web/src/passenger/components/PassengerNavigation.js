@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 
 export default function PassengerNavigation() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -14,42 +15,44 @@ export default function PassengerNavigation() {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 shadow-sm">
+    <nav className="border-b border-gray-200 shadow-sm" style={{ backgroundColor: '#ddfce6' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/passenger/dashboard" className="text-base font-bold text-blue-600">
+            <Link to="/passenger/dashboard" className="text-base font-bold" style={{ color: '#123458' }}>
               BaggageLens
             </Link>
-            <span className="ml-2 px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-              Passenger
-            </span>
+
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8 text-sm">
             <Link
               to="/passenger/dashboard"
-              className="text-gray-600 hover:text-gray-900 font-medium text-sm transition-colors"
+              className={`font-medium text-sm transition-colors px-3 py-1 rounded ${location.pathname === '/passenger/dashboard' ? 'bg-green-100' : ''}`}
+              style={{ color: '#123458' }}
             >
               Dashboard
             </Link>
             <Link
               to="/passenger/cases"
-              className="text-gray-600 hover:text-gray-900 font-medium text-sm transition-colors"
+              className="font-medium text-sm transition-colors"
+              style={{ color: '#123458' }}
             >
               My Cases
             </Link>
             <Link
               to="/passenger/matches"
-              className="text-gray-600 hover:text-gray-900 font-medium text-sm transition-colors"
+              className="font-medium text-sm transition-colors"
+              style={{ color: '#123458' }}
             >
               Matches
             </Link>
             <Link
               to="/passenger/report"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors"
+              className="font-medium text-sm transition-colors px-3 py-1 rounded"
+              style={{ color: '#123458' }}
             >
               Report Lost
             </Link>
@@ -61,25 +64,27 @@ export default function PassengerNavigation() {
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 text-sm"
+                className="flex items-center gap-2 text-sm"
+                style={{ color: '#123458' }}
               >
-                <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                  P
+                <div className="ml-2 px-3 py-1 bg-green-100 text-xs font-semibold rounded-full" style={{ color: '#123458' }}>
+                    
+         P
                 </div>
               </button>
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                   <div className="p-4 border-b border-gray-200">
-                    <p className="font-medium text-gray-900">Passenger</p>
-                    <p className="text-xs text-gray-600">passenger@baggage.com</p>
+                    <p className="font-medium" style={{ color: '#123458' }}>Passenger</p>
+                    <p className="text-xs" style={{ color: '#123458' }}>passenger@baggage.com</p>
                   </div>
-                  <button className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 text-sm">
+                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm" style={{ color: '#123458' }}>
                     Profile
                   </button>
-                  <button className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 text-sm">
+                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm" style={{ color: '#123458' }}>
                     Settings
                   </button>
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 hover:bg-red-50 text-sm" style={{ color: '#123458' }}>
                     Logout
                   </button>
                 </div>
@@ -89,7 +94,8 @@ export default function PassengerNavigation() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-gray-600 hover:text-gray-900"
+              className="md:hidden"
+              style={{ color: '#123458' }}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -103,25 +109,29 @@ export default function PassengerNavigation() {
           <div className="md:hidden py-4 border-t border-gray-200">
             <Link
               to="/passenger/dashboard"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded"
+              className={`block px-4 py-2 hover:bg-gray-50 rounded ${location.pathname === '/passenger/dashboard' ? 'bg-green-100' : ''}`}
+              style={{ color: '#123458' }}
             >
               Dashboard
             </Link>
             <Link
               to="/passenger/cases"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded"
+              className="block px-4 py-2 hover:bg-gray-50 rounded"
+              style={{ color: '#123458' }}
             >
               My Cases
             </Link>
             <Link
               to="/passenger/matches"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded"
+              className="block px-4 py-2 hover:bg-gray-50 rounded"
+              style={{ color: '#123458' }}
             >
               Matches
             </Link>
             <Link
               to="/passenger/report"
-              className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded font-medium"
+              className="block px-4 py-2 hover:bg-blue-50 rounded font-medium"
+              style={{ color: '#123458' }}
             >
               Report Lost
             </Link>

@@ -310,27 +310,27 @@ export default function LoginPage() {
         {/* Sign Up Form */}
         <div className="form-container sign-up-container absolute top-12 md:top-0 md:right-0 left-0 md:left-auto h-[calc(100%-48px)] md:h-full w-full md:w-1/2 transition-all duration-700" style={isSignUp ? { transform: 'translateX(0)', opacity: 1, zIndex: 5 } : { transform: 'translateX(100%)', opacity: 0, zIndex: 1, pointerEvents: 'none' }}>
           <form onSubmit={handleSignup} className="h-full flex flex-col justify-center items-center px-4 sm:px-6 py-6 sm:py-8 overflow-y-auto" style={{ background: '#d9ebee', gap: '8px' }}>
-            <h1 className="font-bold text-base sm:text-lg md:text-xl mb-1 text-black text-center w-full">Create Account</h1>
+            <h1 className="font-bold text-base sm:text-lg md:text-xl mb-6 text-center w-full" style={{color:'#014769'}}>Create Account</h1>
             <div className="w-full flex flex-col gap-2">
               <div>
                 <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="signup-email">Email</label>
-                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white">
+                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="0 0 32 32" height={16} className="text-gray-600"><g data-name="Layer 3" id="Layer_3"><path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z" fill="currentColor" /></g></svg>
-                  <input id="signup-email" type="email" placeholder="Enter your Email" value={signupEmail} onChange={e => setSignupEmail(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-sm text-black placeholder-gray-400 font-poppins" />
+                  <input id="signup-email" type="email" placeholder="Enter your Email" value={signupEmail} onChange={e => setSignupEmail(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
                 </div>
               </div>
               <div>
                 <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="signup-password">Password</label>
-                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white">
+                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="-64 0 512 512" height={16} className="text-gray-600"><path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0" fill="currentColor" /><path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0" fill="currentColor" /></svg>
-                  <input id="signup-password" type="password" placeholder="Enter your Password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-sm text-black placeholder-gray-400 font-poppins" />
+                  <input id="signup-password" type="password" placeholder="Enter your Password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
                 </div>
               </div>
               <div>
                 <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="signup-confirm-password">Confirm Password</label>
-                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white">
+                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="-64 0 512 512" height={16} className="text-gray-600"><path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0" fill="currentColor" /><path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0" fill="currentColor" /></svg>
-                  <input id="signup-confirm-password" type="password" placeholder="Confirm Password" value={signupConfirm} onChange={e => setSignupConfirm(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-sm text-black placeholder-gray-400 font-poppins" />
+                  <input id="signup-confirm-password" type="password" placeholder="Confirm Password" value={signupConfirm} onChange={e => setSignupConfirm(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
                 </div>
               </div>
               <div className="flex items-start gap-1.5 mt-0.5">
@@ -341,11 +341,11 @@ export default function LoginPage() {
                   onChange={(e) => setAgreeToTerms(e.target.checked)}
                   className="w-4 h-4 sm:w-3.5 sm:h-3.5 mt-0.5 cursor-pointer accent-blue-600 rounded flex-shrink-0"
                 />
-                <label htmlFor="agree-terms" className="text-xs text-black select-none cursor-pointer font-medium leading-tight">
-                  I agree to the <a href="/terms" className="text-blue-600 hover:underline">Terms and Conditions</a>
+                <label htmlFor="agree-terms" className="text-xs select-none cursor-pointer font-medium leading-tight mb-1" style={{ color: '#014769' }}>
+                  I agree to the <a href="/terms" className=" hover:underline">Terms and Conditions</a>
                 </label>
               </div>
-              <button type="submit" disabled={isLoading} className="w-full bg-black text-white rounded-lg py-2.5 sm:py-2 font-semibold text-xs sm:text-sm hover:bg-gray-800 disabled:bg-gray-400 transition-colors mt-3 cursor-pointer">Sign Up</button>
+              <button type="submit" disabled={isLoading} className="w-full  text-white rounded-lg py-2.5 sm:py-2 font-semibold text-xs sm:text-sm hover:bg-gray-800 disabled:bg-gray-400 transition-colors mt-3 cursor-pointer" style={{backgroundColor: '#014769'}}>Sign Up</button>
             </div>
             <div className="w-full flex justify-center mt-2">
               <GoogleLogin
@@ -359,41 +359,41 @@ export default function LoginPage() {
         {/* Sign In Form */}
         <div className="form-container sign-in-container absolute top-12 md:top-0 left-0 h-[calc(100%-48px)] md:h-full w-full md:w-1/2 transition-all duration-700" style={isSignUp ? { transform: 'translateX(100%)', opacity: 0, zIndex: 1, pointerEvents: 'none' } : { transform: 'translateX(0)', opacity: 1, zIndex: 5 }}>
           <form onSubmit={handleLogin} className="h-full flex flex-col justify-center items-center px-4 sm:px-6 py-6 sm:py-8" style={{ background: '#d9ebee', gap: '8px' }}>
-            <h1 className="font-bold text-base sm:text-lg md:text-xl mb-1 text-black text-center w-full">Login</h1>
+            <h1 className="font-bold text-base sm:text-lg md:text-xl mb-8  text-center w-full" style={{color: '#014769'}}>Let's Login</h1>
             <div className="w-full flex flex-col gap-2">
               <div>
                 <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="login-email">Email</label>
-                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white">
+                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="0 0 32 32" height={16} className="text-gray-600"><g data-name="Layer 3" id="Layer_3"><path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z" fill="currentColor" /></g></svg>
-                  <input id="login-email" type="email" placeholder="Enter your Email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-sm text-black placeholder-gray-400 font-poppins" />
+                  <input id="login-email" type="email" placeholder="Enter your Email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
                 </div>
               </div>
               <div>
                 <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="login-password">Password</label>
-                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white">
+                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="-64 0 512 512" height={16} className="text-gray-600"><path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0" fill="currentColor" /><path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0" fill="currentColor" /></svg>
-                  <input id="login-password" type="password" placeholder="Enter your Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-sm text-black placeholder-gray-400 font-poppins" />
+                  <input id="login-password" type="password" placeholder="Enter your Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-0.5 gap-2 sm:gap-0">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-0.5 gap-2 sm:gap-0 mb-2">
                 <div className="flex items-center gap-1.5">
                   <input 
                     id="keep-signed-in" 
                     type="checkbox" 
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 sm:w-3.5 sm:h-3.5 cursor-pointer accent-blue-600 rounded" 
+                    className="w-3 h-3 sm:w-3.5 sm:h-3.5 cursor-pointer accent-green-950 rounded" 
                   />
-                  <label htmlFor="keep-signed-in" className="text-xs text-black select-none cursor-pointer font-medium">Remember me</label>
+                  <label htmlFor="keep-signed-in" className="text-xs select-none cursor-pointer font-medium" style={ {color: '#014769'}}>Remember me</label>
                 </div>
                 <span 
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-xs text-blue-600 font-medium cursor-pointer hover:underline"
+                  className="text-xs font-medium cursor-pointer hover:underline" style={ {color: '#014769'}}
                 >
                   Forgot password?
                 </span>
               </div>
-              <button type="submit" disabled={isLoading} className="w-full bg-black text-white rounded-lg py-2.5 sm:py-2 font-semibold text-xs sm:text-sm hover:bg-gray-800 disabled:bg-gray-400 transition-colors mt-3 cursor-pointer">Sign In</button>
+              <button type="submit" disabled={isLoading} className="w-full  text-white rounded-lg py-2.5 sm:py-2 font-semibold text-xs sm:text-sm hover:bg-gray-800 disabled:bg-gray-400 transition-colors mt-3 cursor-pointer" style={{backgroundColor: '#014769'}}>Sign In</button>
             </div>
             <div className="w-full flex justify-center mt-2">
               <GoogleLogin
@@ -408,11 +408,11 @@ export default function LoginPage() {
         <div className="overlay-container absolute top-0 left-1/2 w-1/2 h-full overflow-hidden z-100 transition-transform duration-700" style={isSignUp ? { transform: 'translateX(-100%)' } : {}}>
           <div className="overlay bg-white text-primary absolute left-[-100%] h-full w-[200%] transition-transform duration-700" style={isSignUp ? { transform: 'translateX(50%)', background: '#fff' } : { background: '#fff' }}>
             <div className="overlay-panel overlay-left absolute flex flex-col items-center justify-center px-1.5 text-center top-0 h-full w-1/2 transition-transform duration-700" style={isSignUp ? { transform: 'translateX(0)' } : { transform: 'translateX(-20%)' }}>
-              <h1 className="font-bold text-2xs text-secondary-dark mb-1" style={{fontSize: '0.65rem'}}>Welcome Back!</h1>
+              <h1 className="font-bold text-2xs text-secondary-dark mb-1" style={{fontSize: '0.85rem'}}>Welcome Back!</h1>
               <p className="text-2xs font-light mb-2 text-secondary-dark/70 leading-tight" style={{fontSize: '0.55rem'}}>Reconnect with your lost belongings</p>
               <video
                 src={signupVideo}
-                className="w-44 h-44 mb-1.5 "
+                className="w-64 h-44 mb-1.5 "
                 autoPlay
                 loop
                 muted
@@ -420,10 +420,10 @@ export default function LoginPage() {
                 aria-label="Sign up animation"
               />
               <p className="text-2xs font-light mb-2 text-secondary-dark leading-tight" style={{fontSize: '0.6rem'}}>Already have an account? Sign in to access your luggage tracking and find your belongings</p>
-              <button className="ghost bg-transparent text-secondary-dark font-bold text-2xs mt-1" style={{fontSize: '0.65rem'}} onClick={() => setIsSignUp(false)}>Sign In Here</button>
+              <button className="ghost bg-transparent text-secondary-dark font-bold text-2xs mt-1" style={{fontSize: '0.65rem'}} onClick={() => setIsSignUp(false)}>Click Here to Login</button>
             </div>
             <div className="overlay-panel overlay-right absolute flex flex-col items-center justify-center px-1.5 text-center top-0 h-full w-1/2 right-0 transition-transform duration-700" style={isSignUp ? { transform: 'translateX(20%)' } : { transform: 'translateX(0)' }}>
-              <h1 className="font-bold text-2xs text-secondary-dark mb-1" style={{fontSize: '0.65rem'}}>Hello, Friend!</h1>
+              <h1 className="font-bold text-2xs text-secondary-dark mb-1" style={{fontSize: '0.85rem'}}>Hello, Friend!</h1>
               <p className="text-2xs font-light mb-2 text-secondary-dark/70 leading-tight" style={{fontSize: '0.55rem'}}>Begin your journey to recovery</p>
               <video
                 src={loginVideo}
@@ -434,8 +434,8 @@ export default function LoginPage() {
                 playsInline
                 aria-label="Login animation"
               />
-              <p className="text-2xs font-light mb-2 text-secondary-dark leading-tight" style={{fontSize: '0.6rem'}}>Don't have an account? Create one to start tracking your luggage and reunite with your belongings</p>
-              <button className="ghost bg-transparent text-secondary-dark font-bold text-2xs mt-1" style={{fontSize: '0.65rem'}} onClick={() => setIsSignUp(true)}>Create Account</button>
+              <p className="text-2xs font-light mb-2  leading-tight" style={{fontSize: '0.6rem', color: '#014769'}}>Don't have an account? Create one to start tracking your luggage and reunite with your belongings</p>
+              <button className="ghost bg-transparent text-secondary-dark font-bold text-2xs mt-1" style={{fontSize: '0.65rem'}} onClick={() => setIsSignUp(true)}>Click Here to Create Account</button>
             </div>
           </div>
         </div>
