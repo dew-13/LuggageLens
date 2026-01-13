@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import LandingPage from './LandingPage';
 import LoginPage from './LoginPage';
+import ResetPasswordPage from './ResetPasswordPage';
 
 // Staff Pages
 import StaffDashboard from './staff/pages/StaffDashboard';
@@ -30,10 +31,17 @@ function App() {
     const savedUser = localStorage.getItem('user');
     
     if (savedToken && savedUser) {
-      useAuthStore.setState({
-        token: savedToken,
-        user: JSON.parse(savedUser)
-      });
+      try {
+        useAuthStore.setState({
+          token: savedToken,
+          user: JSON.parse(savedUser)
+        });
+      } catch (error) {
+        console.error('Failed to parse saved user data:', error);
+        // Clear invalid data
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user');
+      }
     }
     
     setIsLoading(false);
@@ -53,6 +61,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<LoginPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Staff Routes */}
           <Route path="/staff/dashboard" element={<StaffDashboard />} />

@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import useAuthStore from '../../store/authStore';
 
 export default function StaffNavigation() {
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm">
@@ -68,7 +76,7 @@ export default function StaffNavigation() {
                   <button className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 text-sm">
                     Settings
                   </button>
-                  <button className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm">
                     Logout
                   </button>
                 </div>

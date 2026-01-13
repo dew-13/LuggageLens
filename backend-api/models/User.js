@@ -1,22 +1,65 @@
-// User Model Schema
+const mongoose = require('mongoose');
 
-// Example User document structure:
-/*
-{
-  _id: ObjectId,
-  name: String,
-  email: String,
-  phone: String,
-  password: String (hashed),
-  role: String (passenger, staff, admin),
-  profilePicture: String (URL),
-  address: String,
-  city: String,
-  country: String,
-  otpVerified: Boolean,
-  createdAt: Date,
-  updatedAt: Date
-}
-*/
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: false
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true
+  },
+  phone: {
+    type: String,
+    required: false
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    enum: ['passenger', 'staff', 'admin'],
+    default: 'passenger'
+  },
+  profilePicture: {
+    type: String,
+    required: false
+  },
+  address: {
+    type: String,
+    required: false
+  },
+  city: {
+    type: String,
+    required: false
+  },
+  country: {
+    type: String,
+    required: false
+  },
+  otpVerified: {
+    type: Boolean,
+    default: false
+  },
+  resetToken: {
+    type: String,
+    required: false
+  },
+  resetTokenExpire: {
+    type: Date,
+    required: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
 
-// TODO: Implement Mongoose schema
+module.exports = mongoose.model('User', userSchema);
