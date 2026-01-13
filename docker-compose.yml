@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: baggagelens-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - baggagelens-network
+
+  # Node.js Backend API
+  backend-api:
+    build:
+      context: ./backend-api
+      dockerfile: Dockerfile
+    container_name: baggagelens-api
+    environment:
+      NODE_ENV: development
+      MONGO_URI: mongodb://admin:admin123@mongodb:27017/baggagelens?authSource=admin
+      PORT: 5000
+      AI_API_URL: http://ai-model:8000
+      JWT_SECRET: your_jwt_secret_key_here
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+    networks:
+      - baggagelens-network
+    volumes:
+      - ./backend-api:/app
+
+  # Python FastAPI AI Model Service
+  ai-model:
+    build:
+      context: ./ai-model
+      dockerfile: Dockerfile
+    container_name: baggagelens-ai
+    environment:
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "8000:8000"
+    networks:
+      - baggagelens-network
+    volumes:
+      - ./ai-model:/app
+
+  # React Unified Web App (Passenger & Staff)
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: baggagelens-web
+    environment:
+      REACT_APP_API_URL: http://localhost:5000/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend-api
+    networks:
+      - baggagelens-network
+    volumes:
+      - ./web:/app
+
+  # Redis (Optional - for caching)
+  redis:
+    image: redis:7-alpine
+    container_name: baggagelens-cache
+    ports:
+      - "6379:6379"
+    networks:
+      - baggagelens-network
+
+volumes:
+  mongo_data:
+
+networks:
+  baggagelens-network:
+    driver: bridge
