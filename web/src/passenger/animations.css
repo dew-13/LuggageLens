@@ -1,0 +1,135 @@
+/* Passenger Portal - Minimal Essential Animations Only */
+
+/* =============== BASIC TRANSITIONS =============== */
+
+/* Smooth transitions for all interactive elements */
+button, a, input, textarea, select {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* =============== BUTTON ANIMATIONS (HOVER/ACTIVE) =============== */
+
+.btn-animated:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-animated:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-animated:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =============== FORM INPUT ANIMATIONS =============== */
+
+.form-input-animated {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.form-input-animated:focus {
+  border-color: #2596be;
+  box-shadow: 0 0 0 3px rgba(37, 150, 190, 0.1);
+  outline: none;
+}
+
+/* =============== STATUS BADGE ANIMATIONS =============== */
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.status-badge-animated {
+  transition: all 0.2s ease;
+}
+
+.status-badge-animated.new {
+  animation: badgePulse 2s ease-in-out;
+}
+
+/* =============== SUCCESS/ERROR MESSAGES =============== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.success-message {
+  animation: fadeIn 0.3s ease-out;
+  background-color: rgba(34, 197, 94, 0.1);
+}
+
+.error-message {
+  animation: fadeIn 0.3s ease-out;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.success-icon {
+  transition: transform 0.2s ease;
+}
+
+/* =============== PROGRESS BAR ANIMATION =============== */
+
+@keyframes progressFill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.progress-bar-animated {
+  animation: progressFill 1s ease-out;
+}
+
+/* =============== LOADING ANIMATION =============== */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* =============== MODAL ANIMATIONS =============== */
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-animated {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+/* =============== DISABLE ANIMATIONS FOR REDUCED MOTION =============== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

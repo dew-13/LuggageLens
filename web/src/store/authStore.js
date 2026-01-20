@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import apiClient from '../services/apiClient';
 
 const useAuthStore = create((set) => ({
   user: null,
@@ -9,33 +10,23 @@ const useAuthStore = create((set) => ({
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
-      // Call backend API
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+      // Call backend API using centralized client
+      const { data } = await apiClient.post('/auth/login', { email, password });
+
+      set({
+        user: data.user,
+        token: data.token,
+        isLoading: false
       });
 
-      const data = await response.json();
+      // Save to localStorage
+      localStorage.setItem('jwt_token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
 
-      if (response.ok) {
-        set({
-          user: data.user,
-          token: data.token,
-          isLoading: false
-        });
-
-        // Save to localStorage
-        localStorage.setItem('jwt_token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        return true;
-      } else {
-        set({ error: data.error || 'Login failed', isLoading: false });
-        return false;
-      }
+      return true;
     } catch (error) {
-      set({ error: error.message, isLoading: false });
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+      set({ error: errorMessage, isLoading: false });
       return false;
     }
   },

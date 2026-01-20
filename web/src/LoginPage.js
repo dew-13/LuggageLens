@@ -5,6 +5,7 @@ import signupVideo from './images/signup.mp4';
 import loginVideo from './images/login.mp4';
 import loginBg from './images/loginbg.jpg';
 import useAuthStore from './store/authStore';
+import apiClient from './services/apiClient';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -20,6 +21,9 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showSignupConfirm, setShowSignupConfirm] = useState(false);
 
   // Load saved credentials if "Remember me" was checked
   useEffect(() => {
@@ -36,22 +40,12 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      // Call backend API to login
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: loginEmail,
-          password: loginPassword
-        })
+      // Call backend API using centralized API client
+      const { data } = await apiClient.post('/auth/login', {
+        email: loginEmail,
+        password: loginPassword
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
-      }
-
-      const data = await response.json();
       console.log('Login successful:', data);
       
       // Handle "Remember me" functionality
@@ -85,7 +79,8 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error('Login error:', error);
-      alert('Login error: ' + error.message);
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+      alert('Login error: ' + errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -323,14 +318,20 @@ export default function LoginPage() {
                 <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="signup-password">Password</label>
                 <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="-64 0 512 512" height={16} className="text-gray-600"><path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0" fill="currentColor" /><path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0" fill="currentColor" /></svg>
-                  <input id="signup-password" type="password" placeholder="Enter your Password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
+                  <input id="signup-password" type={showSignupPassword ? 'text' : 'password'} placeholder="Enter your Password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
+                  <button type="button" onClick={() => setShowSignupPassword(!showSignupPassword)} className="text-gray-600 hover:text-gray-800 cursor-pointer transition-colors ml-auto flex-shrink-0" aria-label="Toggle password visibility">
+                    {showSignupPassword ? '👁️' : '👁️‍🗨️'}
+                  </button>
                 </div>
               </div>
               <div>
                 <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="signup-confirm-password">Confirm Password</label>
                 <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="-64 0 512 512" height={16} className="text-gray-600"><path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0" fill="currentColor" /><path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0" fill="currentColor" /></svg>
-                  <input id="signup-confirm-password" type="password" placeholder="Confirm Password" value={signupConfirm} onChange={e => setSignupConfirm(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
+                  <input id="signup-confirm-password" type={showSignupConfirm ? 'text' : 'password'} placeholder="Confirm Password" value={signupConfirm} onChange={e => setSignupConfirm(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
+                  <button type="button" onClick={() => setShowSignupConfirm(!showSignupConfirm)} className="text-gray-600 hover:text-gray-800 cursor-pointer transition-colors ml-auto flex-shrink-0" aria-label="Toggle password visibility">
+                    {showSignupConfirm ? '👁️' : '👁️‍🗨️'}
+                  </button>
                 </div>
               </div>
               <div className="flex items-start gap-1.5 mt-0.5">
@@ -372,7 +373,10 @@ export default function LoginPage() {
                 <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="login-password">Password</label>
                 <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="-64 0 512 512" height={16} className="text-gray-600"><path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0" fill="currentColor" /><path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0" fill="currentColor" /></svg>
-                  <input id="login-password" type="password" placeholder="Enter your Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
+                  <input id="login-password" type={showLoginPassword ? 'text' : 'password'} placeholder="Enter your Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
+                  <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} className="text-gray-600 hover:text-gray-800 cursor-pointer transition-colors ml-auto flex-shrink-0" aria-label="Toggle password visibility">
+                    {showLoginPassword ? '👁️' : '👁️‍🗨️'}
+                  </button>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-0.5 gap-2 sm:gap-0 mb-2">

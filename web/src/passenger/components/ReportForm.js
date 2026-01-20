@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../animations.css';
 
 export default function ReportForm({ onSubmit }) {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ export default function ReportForm({ onSubmit }) {
     location: '',
     contact: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,6 +24,7 @@ export default function ReportForm({ onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     onSubmit(formData);
   };
 
@@ -29,7 +32,7 @@ export default function ReportForm({ onSubmit }) {
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Description */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 card-animated">
           <label className="block text-xs font-medium text-gray-700 mb-2">Description *</label>
           <textarea
             name="description"
@@ -37,7 +40,7 @@ export default function ReportForm({ onSubmit }) {
             onChange={handleChange}
             placeholder="Describe your luggage in detail..."
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input-animated w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows="4"
           />
         </div>
@@ -51,7 +54,7 @@ export default function ReportForm({ onSubmit }) {
             value={formData.color}
             onChange={handleChange}
             placeholder="e.g., Black, Red, Blue"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input-animated w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -64,7 +67,7 @@ export default function ReportForm({ onSubmit }) {
             value={formData.brand}
             onChange={handleChange}
             placeholder="e.g., Samsonite, Louis Vuitton"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input-animated w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -77,7 +80,7 @@ export default function ReportForm({ onSubmit }) {
             value={formData.reportDate}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input-animated w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -90,7 +93,7 @@ export default function ReportForm({ onSubmit }) {
             value={formData.location}
             onChange={handleChange}
             placeholder="Airport, Hotel, etc."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input-animated w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -104,7 +107,7 @@ export default function ReportForm({ onSubmit }) {
             onChange={handleChange}
             placeholder="+1 (555) 000-0000"
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input-animated w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -143,13 +146,14 @@ export default function ReportForm({ onSubmit }) {
       <div className="mt-8 flex gap-4">
         <button
           type="submit"
-          className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium text-xs hover:bg-blue-700 transition-colors"
+          disabled={isSubmitting}
+          className="btn-animated flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium text-xs hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Submit Report
+          {isSubmitting ? 'Submitting...' : 'Submit Report'}
         </button>
         <button
           type="button"
-          className="flex-1 bg-gray-200 text-gray-900 py-3 px-4 rounded-lg font-medium text-xs hover:bg-gray-300 transition-colors"
+          className="btn-animated flex-1 bg-gray-200 text-gray-900 py-3 px-4 rounded-lg font-medium text-xs hover:bg-gray-300 transition-colors"
         >
           Cancel
         </button>

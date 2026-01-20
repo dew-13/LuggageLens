@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
+import '../animations.css';
 
 export default function PassengerNavigation() {
   const navigate = useNavigate();
@@ -30,28 +31,28 @@ export default function PassengerNavigation() {
           <div className="hidden md:flex items-center gap-8 text-sm">
             <Link
               to="/passenger/dashboard"
-              className={`font-medium text-sm transition-colors px-3 py-1 rounded ${location.pathname === '/passenger/dashboard' ? 'bg-green-100' : ''}`}
+              className={`nav-item-animated font-medium text-sm transition-colors px-3 py-1 rounded ${location.pathname === '/passenger/dashboard' ? 'bg-green-100' : ''}`}
               style={{ color: '#123458' }}
             >
               Dashboard
             </Link>
             <Link
               to="/passenger/cases"
-              className="font-medium text-sm transition-colors"
+              className="nav-item-animated font-medium text-sm transition-colors"
               style={{ color: '#123458' }}
             >
               My Cases
             </Link>
             <Link
               to="/passenger/matches"
-              className="font-medium text-sm transition-colors"
+              className="nav-item-animated font-medium text-sm transition-colors"
               style={{ color: '#123458' }}
             >
               Matches
             </Link>
             <Link
               to="/passenger/report"
-              className="font-medium text-sm transition-colors px-3 py-1 rounded"
+              className="nav-item-animated font-medium text-sm transition-colors px-3 py-1 rounded"
               style={{ color: '#123458' }}
             >
               Report Lost
@@ -106,7 +107,7 @@ export default function PassengerNavigation() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
+          <div className="md:hidden py-4 border-t border-gray-200 card-animated">
             <Link
               to="/passenger/dashboard"
               className={`block px-4 py-2 hover:bg-gray-50 rounded ${location.pathname === '/passenger/dashboard' ? 'bg-green-100' : ''}`}

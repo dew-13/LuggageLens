@@ -1,4 +1,5 @@
 import React from 'react';
+import '../animations.css';
 
 export default function MyCasesList({ cases }) {
   return (
@@ -21,14 +22,14 @@ export default function MyCasesList({ cases }) {
                 </td>
               </tr>
             ) : (
-              cases.map((lugCase) => (
-                <tr key={lugCase.id} className="hover:bg-gray-50 transition-colors">
+              cases.map((lugCase, index) => (
+                <tr key={lugCase.id} className="table-row-animated hover:bg-gray-50 transition-colors" style={{ animationDelay: `${index * 50}ms` }}>
                   <td className="px-6 py-4 text-sm text-gray-900">{lugCase.description}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {new Date(lugCase.date).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                    <span className={`status-badge-animated px-2 py-1 rounded text-xs font-semibold inline-block ${
                       lugCase.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                       lugCase.status === 'matched' ? 'bg-green-100 text-green-800' :
                       'bg-blue-100 text-blue-800'
@@ -37,7 +38,7 @@ export default function MyCasesList({ cases }) {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button className="text-blue-600 hover:text-blue-800 font-semibold text-xs">View</button>
+                    <button className="text-blue-600 hover:text-blue-800 font-semibold text-xs transition-colors hover:underline">View</button>
                   </td>
                 </tr>
               ))
