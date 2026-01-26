@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import PassengerNavigation from '../components/PassengerNavigation';
 import MyLuggageSummary from '../components/MyLuggageSummary';
 import MatchesHighlights from '../components/MatchesHighlights';
-import heroImage from '../../images/hero.avif';
+import baggageBeltVideo from '../../images/baggage belt.mp4';
+// import heroImage from '../../images/hero.avif';
 import '../animations.css';
 
 export default function PassengerDashboard() {
@@ -14,27 +15,8 @@ export default function PassengerDashboard() {
     pendingCases: 0,
     resolvedCases: 0
   });
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
   useEffect(() => {
     fetchStats();
-  }, []);
-
-  // Mouse tracking for interactive animation
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const { clientX, clientY } = e;
-      const { innerWidth, innerHeight } = window;
-      
-      // Normalize mouse position to -1 to 1 range
-      const x = (clientX / innerWidth - 0.5) * 2;
-      const y = (clientY / innerHeight - 0.5) * 2;
-      
-      setMousePosition({ x, y });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   const fetchStats = async () => {
@@ -52,21 +34,38 @@ export default function PassengerDashboard() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#ffffff' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'transparent' }}>
       <PassengerNavigation />
       
       {/* Hero Section */}
       <div 
         className="relative overflow-hidden" 
         style={{ 
-          backgroundImage: `url(${heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
           position: 'relative',
           minHeight: '500px'
         }}
       >
+        {/* Video Background */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 0
+          }}
+        >
+          <source src={baggageBeltVideo} type="video/mp4" />
+          {/* Fallback for browsers that don't support video */}
+          Your browser does not support the video tag.
+        </video>
+
         {/* Overlay for better text readability */}
         <div 
           style={{
@@ -75,109 +74,53 @@ export default function PassengerDashboard() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(16, 46, 74, 0.75)',
+            backgroundColor: 'rgba(16, 46, 74, 0.5)',
             zIndex: 1
           }}
         />
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-60 relative z-10 mt-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            <h1 className="text-xl md:text-3xl lg:text-3xl font-bold text-white mb-6" style={{ background: 'linear-gradient(135deg, #10ff66 0%, #00d4ff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               Welcome to BaggageLens
             </h1>
-            <p className="text-lg md:text-xl text-white mb-10 max-w-3xl mx-auto" style={{ color: '#b7b7b7' }}>
-              Lost your luggage? Don't worry. Our AI-powered system helps you find your missing baggage quickly and efficiently.
+            <p className="text-sm md:text-base text-white mb-10 max-w-3xl mx-auto" style={{ color: '#e0e0e0' }}>
+              Lost your luggage? <br></br>Our AI-powered system helps you find your missing baggage quickly and efficiently.
             </p>
             <Link
               to="/passenger/report"
-              className="inline-block btn-animated px-8 py-4 rounded-lg text-lg font-semibold text-green-100 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-              style={{ backgroundColor: '#345770' }}
+              className="inline-block btn-animated px-4 py-2 rounded-lg text-sm font-semibold transform hover:scale-105 transition-all duration-200"
+              style={{ 
+                background: 'rgba(20, 40, 60, 0.4)',
+                backgroundImage: 'linear-gradient(rgba(20, 40, 60, 0.4), rgba(20, 40, 60, 0.4)), linear-gradient(135deg, #10ff66 0%, #00d4ff 100%)',
+                backgroundClip: 'padding-box, border-box',
+                backgroundOrigin: 'padding-box, border-box',
+                border: '2px solid transparent',
+                color: '#e0e0e0',
+                boxShadow: '0 0 20px rgba(16, 255, 102, 0.3), 0 0 40px rgba(0, 212, 255, 0.2)',
+                position: 'relative',
+                opacity: 1
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 30px rgba(16, 255, 102, 0.6), 0 0 60px rgba(0, 212, 255, 0.4), 0 0 80px rgba(16, 255, 102, 0.3)';
+                e.currentTarget.style.color = '#10ff66';
+                e.currentTarget.style.opacity = '1';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(16, 255, 102, 0.3), 0 0 40px rgba(0, 212, 255, 0.2)';
+                e.currentTarget.style.color = '#e0e0e0';
+                e.currentTarget.style.opacity = '0.8';
+              }}
             >
               Find My Luggage
             </Link>
           </div>
         </div>
-        
-        {/* Interactive Floating Luggage Icons */}
-        <div 
-          className="absolute pointer-events-none"
-          style={{ 
-            top: '20%', 
-            right: '10%',
-            transform: `translate(${mousePosition.x * 30}px, ${mousePosition.y * 30}px)`,
-            transition: 'transform 0.3s ease-out',
-            zIndex: 2
-          }}
-        >
-          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" opacity="0.15">
-            <rect x="20" y="30" width="80" height="60" rx="8" fill="white" stroke="white" strokeWidth="3"/>
-            <rect x="30" y="40" width="60" height="40" rx="4" fill="transparent" stroke="white" strokeWidth="2"/>
-            <rect x="45" y="20" width="30" height="15" rx="4" fill="white"/>
-            <circle cx="35" cy="95" r="8" fill="white"/>
-            <circle cx="85" cy="95" r="8" fill="white"/>
-            <line x1="40" y1="55" x2="80" y2="55" stroke="white" strokeWidth="2"/>
-            <line x1="40" y1="65" x2="80" y2="65" stroke="white" strokeWidth="2"/>
-          </svg>
-        </div>
-
-        <div 
-          className="absolute pointer-events-none"
-          style={{ 
-            top: '60%', 
-            left: '15%',
-            transform: `translate(${mousePosition.x * -20}px, ${mousePosition.y * -25}px)`,
-            transition: 'transform 0.3s ease-out'
-          }}
-        >
-          <svg width="100" height="100" viewBox="0 0 100 100" fill="none" opacity="0.12">
-            <rect x="15" y="25" width="70" height="50" rx="6" fill="white" stroke="white" strokeWidth="2.5"/>
-            <rect x="25" y="33" width="50" height="34" rx="3" fill="transparent" stroke="white" strokeWidth="1.5"/>
-            <rect x="38" y="15" width="24" height="12" rx="3" fill="white"/>
-            <circle cx="28" cy="78" r="6" fill="white"/>
-            <circle cx="72" cy="78" r="6" fill="white"/>
-          </svg>
-        </div>
-
-        <div 
-          className="absolute pointer-events-none hidden lg:block"
-          style={{ 
-            top: '40%', 
-            left: '8%',
-            transform: `translate(${mousePosition.x * 25}px, ${mousePosition.y * 20}px) rotate(${mousePosition.x * 5}deg)`,
-            transition: 'transform 0.4s ease-out'
-          }}
-        >
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" opacity="0.1">
-            <rect x="12" y="20" width="56" height="40" rx="5" fill="white" stroke="white" strokeWidth="2"/>
-            <rect x="20" y="27" width="40" height="26" rx="2" fill="transparent" stroke="white" strokeWidth="1.5"/>
-            <rect x="30" y="13" width="20" height="10" rx="2.5" fill="white"/>
-            <circle cx="24" cy="63" r="5" fill="white"/>
-            <circle cx="56" cy="63" r="5" fill="white"/>
-          </svg>
-        </div>
-
-        <div 
-          className="absolute pointer-events-none hidden lg:block"
-          style={{ 
-            top: '25%', 
-            right: '25%',
-            transform: `translate(${mousePosition.x * -15}px, ${mousePosition.y * 35}px) rotate(${mousePosition.x * -8}deg)`,
-            transition: 'transform 0.35s ease-out'
-          }}
-        >
-          <svg width="90" height="90" viewBox="0 0 90 90" fill="none" opacity="0.08">
-            <rect x="14" y="22" width="62" height="46" rx="6" fill="white" stroke="white" strokeWidth="2.5"/>
-            <rect x="23" y="30" width="44" height="30" rx="3" fill="transparent" stroke="white" strokeWidth="1.5"/>
-            <rect x="33" y="14" width="24" height="11" rx="3" fill="white"/>
-            <circle cx="27" cy="71" r="6" fill="white"/>
-            <circle cx="63" cy="71" r="6" fill="white"/>
-          </svg>
-        </div>
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
           <div className="stat-card rounded-lg shadow-sm p-6" style={{ backgroundColor: '#f1f1f1', borderWidth: '1px', borderColor: '#2596be' }}>
             <div className="flex items-center justify-between">
               <div>

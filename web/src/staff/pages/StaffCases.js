@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import StaffNavigation from '../components/StaffNavigation';
 import CasesList from '../components/CasesList';
 import CaseFilters from '../components/CaseFilters';
+import baggageClaimImage from '../../images/baggage claim.jpg';
 
 export default function StaffCases() {
   const [cases, setCases] = useState([]);
@@ -27,7 +28,7 @@ export default function StaffCases() {
           description: 'Black leather suitcase with gold handles',
           date: '2026-01-12',
           status: 'pending',
-          image: 'https://via.placeholder.com/150'
+          image: ''
         },
         {
           id: 2,
@@ -35,7 +36,7 @@ export default function StaffCases() {
           description: 'Red duffel bag with brown straps',
           date: '2026-01-11',
           status: 'matched',
-          image: 'https://via.placeholder.com/150'
+          image: ''
         }
       ]);
     } catch (error) {
@@ -46,7 +47,15 @@ export default function StaffCases() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div
+      className="min-h-screen pt-16"
+      style={{
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('${baggageClaimImage}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       <StaffNavigation />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

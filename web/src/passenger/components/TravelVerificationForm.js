@@ -160,6 +160,7 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
     passportNumber: '',
   });
 
+  const [validationErrors, setValidationErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingRoute, setIsFetchingRoute] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState(null);
@@ -167,8 +168,42 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
   const [successMessage, setSuccessMessage] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
 
+  // Validation functions
+  const validateName = (name) => {
+    const nameRegex = /^[a-zA-Z\s'-]+$/; // Only letters, spaces, hyphens, apostrophes
+    return nameRegex.test(name) && name.trim().length > 0;
+  };
+
+  const validateDateOfTravel = (date) => {
+    if (!date) return false;
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return selectedDate <= today; // Must be today or in past (NOT future)
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const newErrors = { ...validationErrors };
+
+    // Real-time validation
+    if (name === 'lastName') {
+      if (value && !validateName(value)) {
+        newErrors[name] = 'Only letters, spaces, hyphens, and apostrophes allowed';
+      } else {
+        delete newErrors[name];
+      }
+    }
+
+    if (name === 'dateOfTravel') {
+      if (value && !validateDateOfTravel(value)) {
+        newErrors[name] = 'Travel date cannot be in the future';
+      } else {
+        delete newErrors[name];
+      }
+    }
+
+    setValidationErrors(newErrors);
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -178,14 +213,30 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
 
   const handleFlightDetailsChange = (e) => {
     const { name, value } = e.target;
-    
-    // Update form data immediately with new value
-    const updatedData = {
-      ...formData,
+    const newErrors = { ...validationErrors };
+
+    // Real-time validation
+    if (name === 'lastName' && value) {
+      if (!validateName(value)) {
+        newErrors[name] = 'Only letters, spaces, hyphens, and apostrophes allowed';
+      } else {
+        delete newErrors[name];
+      }
+    }
+
+    if (name === 'dateOfTravel' && value) {
+      if (!validateDateOfTravel(value)) {
+        newErrors[name] = 'Travel date cannot be in the future';
+      } else {
+        delete newErrors[name];
+      }
+    }
+
+    setValidationErrors(newErrors);
+    setFormData(prev => ({
+      ...prev,
       [name]: value
-    };
-    
-    setFormData(updatedData);
+    }));
     setError(null);
     setSuccessMessage(null);
   };
@@ -228,20 +279,28 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
 
   const handleManualFetchClick = async () => {
     // Validate that all required fields are filled
-    if (!formData.airline || !formData.airline.trim()) {
-      setError('❌ Please select an airline');
-      return;
+    const newErrors = {};
+
+    if (!formData.airline?.trim()) {
+      newErrors.airline = 'Airline is required';
     }
-    if (!formData.flightNumber || !formData.flightNumber.trim()) {
-      setError('❌ Please enter a flight number');
-      return;
+    if (!formData.flightNumber?.trim()) {
+      newErrors.flightNumber = 'Flight number is required';
     }
     if (!formData.dateOfTravel) {
-      setError('❌ Please select a date of travel');
+      newErrors.dateOfTravel = 'Date of travel is required';
+    } else if (!validateDateOfTravel(formData.dateOfTravel)) {
+      newErrors.dateOfTravel = 'Travel date cannot be in the future';
+    }
+
+    setValidationErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      setError('⚠️ Please fix the errors above');
       return;
     }
 
-    // Fetch airports
+    // Fetch flight verification from Amadeus
     await fetchAndAutoFillAirports(
       formData.airline,
       formData.flightNumber,
@@ -255,27 +314,46 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
     setError(null);
     setSuccessMessage(null);
 
-    try {
-      // Validate required fields
-      if (!formData.lastName.trim()) {
-        throw new Error('Last name is required');
-      }
-      if (!formData.airline) {
-        throw new Error('Airline is required');
-      }
-      if (!formData.flightNumber.trim()) {
-        throw new Error('Flight number is required');
-      }
-      if (!formData.dateOfTravel) {
-        throw new Error('Date of travel is required');
-      }
-      if (!formData.originAirport.trim()) {
-        throw new Error('Origin airport is required');
-      }
-      if (!formData.destinationAirport.trim()) {
-        throw new Error('Destination airport is required');
-      }
+    // Validate all required fields
+    const newErrors = {};
 
+    if (!formData.lastName?.trim()) {
+      newErrors.lastName = 'Last name is required';
+    } else if (!validateName(formData.lastName)) {
+      newErrors.lastName = 'Only letters, spaces, hyphens, and apostrophes allowed';
+    }
+
+    if (!formData.airline) {
+      newErrors.airline = 'Airline is required';
+    }
+
+    if (!formData.flightNumber?.trim()) {
+      newErrors.flightNumber = 'Flight number is required';
+    }
+
+    if (!formData.dateOfTravel) {
+      newErrors.dateOfTravel = 'Date of travel is required';
+    } else if (!validateDateOfTravel(formData.dateOfTravel)) {
+      newErrors.dateOfTravel = 'Travel date cannot be in the future';
+    }
+
+    if (!formData.originAirport?.trim()) {
+      newErrors.originAirport = 'Origin airport is required';
+    }
+
+    if (!formData.destinationAirport?.trim()) {
+      newErrors.destinationAirport = 'Destination airport is required';
+    }
+
+    setValidationErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      setIsLoading(false);
+      setError('⚠️ Please fix the errors above before submitting');
+      return;
+    }
+
+    try {
       // Call verification service
       const result = await verifyTravelDetails({
         lastName: formData.lastName.trim(),
@@ -291,87 +369,93 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
 
       setVerificationStatus(result.status);
 
-      if (result.status === 'travel-verified') {
-        setSuccessMessage('✓ Travel verified successfully! You can now report your lost luggage.');
+      if (result.status === 'travel-verified' || result.status === 'travel-likely') {
+        setSuccessMessage('✅ Travel verified successfully! Proceeding to luggage details...');
         setTimeout(() => {
           onVerificationComplete(result);
         }, 1500);
-      } else if (result.status === 'travel-likely') {
-        setSuccessMessage('Travel details appear valid. Please proceed to report your luggage.');
-        setTimeout(() => {
-          onVerificationComplete(result);
-        }, 1500);
-      } else if (result.status === 'manual-review-required') {
-        setSuccessMessage(
-          'Your travel details will be manually reviewed. You can proceed, but your claim may require additional verification.'
-        );
-        // Allow proceeding after delay
-        setTimeout(() => {
-          onVerificationComplete(result);
-        }, 2000);
+      } else {
+        setError('⚠️ Could not verify travel. Please check your details and try again.');
       }
-    } catch (err) {
-      setError(err.message);
+    } catch (error) {
+      console.error('Error verifying travel:', error);
+      setError(`❌ Verification failed: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Get max date for input (today) - users can select today or earlier dates only
+  const today = new Date().toISOString().split('T')[0];
+
   return (
-    <div className="travel-verification-form">
-      <div className="verification-header">
-        <h2>Step 1: Verify Your Travel Details</h2>
-        <p>
-          Please provide your travel information. This helps us verify your claim and expedite the recovery process.
-        </p>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Personal Details Section */}
+      <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm border border-gray-200">
+        <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <span className="text-xl">👤</span> Personal Details
+        </h2>
+
+        <div className="form-group">
+          <label htmlFor="lastName" className="block text-xs font-medium text-gray-700 mb-1">
+            Last Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            className={`w-full px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+              validationErrors.lastName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            }`}
+            placeholder="Enter your last name"
+            disabled={isLoading}
+          />
+          {validationErrors.lastName && (
+            <p className="text-red-600 text-xs mt-1">❌ {validationErrors.lastName}</p>
+          )}
+          <p className="text-gray-500 text-xs mt-1">Letters only (no numbers or special characters)</p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="verification-form-content">
-        <div className="form-section">
-          <h3>Required Information</h3>
+      {/* Travel Confirmation Section */}
+      <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm border border-gray-200">
+        <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <span className="text-xl">✈️</span> Travel Confirmation
+        </h2>
 
-          <div className="form-group">
-            <label htmlFor="lastName" className="form-label">
-              Full Name *
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className="form-input-animated"
-              placeholder="Your full name"
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="airline" className="form-label">
-              Airline *
-            </label>
-            <select
-              id="airline"
-              name="airline"
-              value={formData.airline}
-              onChange={handleFlightDetailsChange}
-              className="form-input-animated"
-              disabled={isLoading}
-            >
-              <option value="">Airline you travelled with</option>
-              {AIRLINES.map(airline => (
-                <option key={airline.code} value={airline.code}>
-                  {airline.code} - {airline.name}
-                </option>
-              ))}
-            </select>
-            
-          </div>
-
-          <div className="form-row">
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="form-group">
-              <label htmlFor="flightNumber" className="form-label">
-                Flight Number *
+              <label htmlFor="airline" className="block text-xs font-medium text-gray-700 mb-1">
+                Airline <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="airline"
+                name="airline"
+                value={formData.airline}
+                onChange={handleFlightDetailsChange}
+                className={`w-full px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                  validationErrors.airline ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
+                disabled={isLoading}
+              >
+                <option value="">Select Airline</option>
+                {AIRLINES.map(airline => (
+                  <option key={airline.code} value={airline.code}>
+                    {airline.code} - {airline.name}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.airline && (
+                <p className="text-red-600 text-sm mt-1">❌ {validationErrors.airline}</p>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="flightNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                Flight Number <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -379,444 +463,237 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
                 name="flightNumber"
                 value={formData.flightNumber}
                 onChange={handleFlightDetailsChange}
-                className="form-input-animated"
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                  validationErrors.flightNumber ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
                 placeholder="e.g., AA123, BA456"
                 disabled={isLoading}
               />
-             
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="dateOfTravel" className="form-label">
-                Date of Travel *
-              </label>
-              <input
-                type="date"
-                id="dateOfTravel"
-                name="dateOfTravel"
-                value={formData.dateOfTravel}
-                onChange={handleFlightDetailsChange}
-                className="form-input-animated"
-                disabled={isLoading}
-              />
+              {validationErrors.flightNumber && (
+                <p className="text-red-600 text-sm mt-1">❌ {validationErrors.flightNumber}</p>
+              )}
             </div>
           </div>
 
-          {/* Fetch Flight Route Button */}
-          <div className="form-group" style={{ marginTop: '16px', marginBottom: '20px' }}>
+          <div className="form-group">
+            <label htmlFor="dateOfTravel" className="block text-sm font-medium text-gray-700 mb-2">
+              Date of Travel <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              id="dateOfTravel"
+              name="dateOfTravel"
+              value={formData.dateOfTravel}
+              onChange={handleFlightDetailsChange}
+              max={today}
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                validationErrors.dateOfTravel ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              }`}
+              disabled={isLoading}
+            />
+            {validationErrors.dateOfTravel && (
+              <p className="text-red-600 text-sm mt-1">❌ {validationErrors.dateOfTravel}</p>
+            )}
+          </div>
+
+          {/* Refresh Button to Verify Flight with Amadeus */}
+          <div className="pt-2">
             <button
               type="button"
               onClick={handleManualFetchClick}
               disabled={isFetchingRoute || isLoading}
-              className="btn-animated"
-              style={{
-                backgroundColor: isFetchingRoute ? '#999' : '#2596be',
-                color: 'white',
-                padding: '10px 20px',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: isFetchingRoute ? 'not-allowed' : 'pointer',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.3s ease',
-              }}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
             >
               {isFetchingRoute ? (
                 <>
-                  <span>🔄 Fetching...</span>
+                  <span className="inline-block animate-spin">🔄</span>
+                  <span>Verifying Flight...</span>
                 </>
               ) : (
                 <>
-                  <span>🔍</span>
-                  <span>Auto-Fill Airports from Flight Details</span>
+                  <span>🔄</span>
+                  <span>Verify Flight Details</span>
                 </>
               )}
             </button>
             {isFetchingRoute && (
-              <small style={{ color: '#2596be', marginTop: '8px', display: 'block' }}>
-                Searching Aviationstack and Amadeus APIs...
-              </small>
+              <p className="text-blue-600 text-sm mt-2">Checking with Amadeus API...</p>
             )}
           </div>
 
-          {/* Error Message Display */}
+          {/* Messages */}
           {error && (
-            <div className="form-group" style={{
-              backgroundColor: '#fee',
-              border: '2px solid #f44',
-              borderRadius: '6px',
-              padding: '12px',
-              marginBottom: '20px',
-              color: '#c33'
-            }}>
-              <p style={{ margin: '0', fontWeight: 'bold' }}>{error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
+              {error}
             </div>
           )}
 
-          {/* Success Message Display */}
           {successMessage && (
-            <div className="form-group" style={{
-              backgroundColor: '#efe',
-              border: '2px solid #4f4',
-              borderRadius: '6px',
-              padding: '12px',
-              marginBottom: '20px',
-              color: '#3a3'
-            }}>
-              <p style={{ margin: '0', fontWeight: 'bold' }}>{successMessage}</p>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-700 text-sm">
+              {successMessage}
             </div>
           )}
 
+          {/* Airport Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="form-group">
+              <label htmlFor="originAirport" className="block text-sm font-medium text-gray-700 mb-2">
+                From Airport <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="originAirport"
+                name="originAirport"
+                value={formData.originAirport}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                  validationErrors.originAirport ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
+                disabled={isLoading || isFetchingRoute}
+              >
+                <option value="">Select Origin Airport</option>
+                {AIRPORTS.map(airport => (
+                  <option key={`origin-${airport.code}`} value={airport.code}>
+                    {airport.code} - {airport.name}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.originAirport && (
+                <p className="text-red-600 text-sm mt-1">❌ {validationErrors.originAirport}</p>
+              )}
+              {routeInfo?.originAirport && (
+                <p className="text-green-600 text-xs mt-1">✅ Auto-filled: {routeInfo.originAirport}</p>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="destinationAirport" className="block text-sm font-medium text-gray-700 mb-2">
+                To Airport <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="destinationAirport"
+                name="destinationAirport"
+                value={formData.destinationAirport}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                  validationErrors.destinationAirport ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
+                disabled={isLoading || isFetchingRoute}
+              >
+                <option value="">Select Destination Airport</option>
+                {AIRPORTS.map(airport => (
+                  <option key={`dest-${airport.code}`} value={airport.code}>
+                    {airport.code} - {airport.name}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.destinationAirport && (
+                <p className="text-red-600 text-sm mt-1">❌ {validationErrors.destinationAirport}</p>
+              )}
+              {routeInfo?.destinationAirport && (
+                <p className="text-green-600 text-xs mt-1">✅ Auto-filled: {routeInfo.destinationAirport}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Other Information Section */}
+      <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <span className="text-2xl">ℹ️</span> Other Information
+          <span className="text-sm text-gray-500 font-normal">(Optional)</span>
+        </h2>
+
+        <p className="text-gray-600 text-sm mb-4">
+          Providing additional details helps us verify your travel and speed up luggage recovery.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="form-group">
-            <label htmlFor="originAirport" className="form-label">
-              Origin Airport * {isFetchingRoute && '🔄 Loading...'}
+            <label htmlFor="baggageTag" className="block text-sm font-medium text-gray-700 mb-2">
+              Baggage Tag Number
             </label>
-            <select
-              id="originAirport"
-              name="originAirport"
-              value={formData.originAirport}
+            <input
+              type="text"
+              id="baggageTag"
+              name="baggageTag"
+              value={formData.baggageTag}
               onChange={handleChange}
-              className="form-input-animated"
-              disabled={isLoading || isFetchingRoute}
-            >
-              <option value="">{isFetchingRoute ? 'Fetching...' : 'Select Origin Airport'}</option>
-              {AIRPORTS.map(airport => (
-                <option key={`origin-${airport.code}`} value={airport.code}>
-                  {airport.code} - {airport.name}
-                </option>
-              ))}
-            </select>
-            {routeInfo && routeInfo.originAirport && (
-              <small style={{ color: '#2596be', marginTop: '4px', display: 'block', fontWeight: 'bold' }}>
-                ✅ Auto-filled: {routeInfo.originAirport} | {routeInfo.source}
-              </small>
-            )}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Found on your baggage claim"
+              disabled={isLoading}
+            />
           </div>
 
           <div className="form-group">
-            <label htmlFor="destinationAirport" className="form-label">
-              Destination Airport * {isFetchingRoute && '🔄 Loading...'}
+            <label htmlFor="pnr" className="block text-sm font-medium text-gray-700 mb-2">
+              PNR (Booking Reference)
             </label>
-            <select
-              id="destinationAirport"
-              name="destinationAirport"
-              value={formData.destinationAirport}
+            <input
+              type="text"
+              id="pnr"
+              name="pnr"
+              value={formData.pnr}
               onChange={handleChange}
-              className="form-input-animated"
-              disabled={isLoading || isFetchingRoute}
-            >
-              <option value="">{isFetchingRoute ? 'Fetching...' : 'Select Destination Airport'}</option>
-              {AIRPORTS.map(airport => (
-                <option key={`dest-${airport.code}`} value={airport.code}>
-                  {airport.code} - {airport.name}
-                </option>
-              ))}
-            </select>
-            {routeInfo && routeInfo.destinationAirport && (
-              <small style={{ color: '#2596be', marginTop: '4px', display: 'block', fontWeight: 'bold' }}>
-                ✅ Auto-filled: {routeInfo.destinationAirport} | {routeInfo.source}
-              </small>
-            )}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="6-character booking code"
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="ticketNumber" className="block text-sm font-medium text-gray-700 mb-2">
+              Ticket Number
+            </label>
+            <input
+              type="text"
+              id="ticketNumber"
+              name="ticketNumber"
+              value={formData.ticketNumber}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="13-digit ticket number"
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="passportNumber" className="block text-sm font-medium text-gray-700 mb-2">
+              Passport Number
+            </label>
+            <input
+              type="text"
+              id="passportNumber"
+              name="passportNumber"
+              value={formData.passportNumber}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="For identity confirmation"
+              disabled={isLoading}
+            />
           </div>
         </div>
+      </div>
 
-        <div className="form-section">
-          <h3>Optional Information (Helpful for Verification)</h3>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="baggageTag" className="form-label">
-                Baggage Tag Number
-              </label>
-              <input
-                type="text"
-                id="baggageTag"
-                name="baggageTag"
-                value={formData.baggageTag}
-                onChange={handleChange}
-                className="form-input-animated"
-                placeholder="Found on your baggage claim"
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="pnr" className="form-label">
-                PNR (Booking Reference)
-              </label>
-              <input
-                type="text"
-                id="pnr"
-                name="pnr"
-                value={formData.pnr}
-                onChange={handleChange}
-                className="form-input-animated"
-                placeholder="6-character booking code"
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="ticketNumber" className="form-label">
-                Ticket Number
-              </label>
-              <input
-                type="text"
-                id="ticketNumber"
-                name="ticketNumber"
-                value={formData.ticketNumber}
-                onChange={handleChange}
-                className="form-input-animated"
-                placeholder="13-digit ticket number"
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="passportNumber" className="form-label">
-                Passport Number
-              </label>
-              <input
-                type="text"
-                id="passportNumber"
-                name="passportNumber"
-                value={formData.passportNumber}
-                onChange={handleChange}
-                className="form-input-animated"
-                placeholder="For identity confirmation"
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-        </div>
-
-        {error && (
-          <div className="error-message" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-            <strong>Error:</strong> {error}
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="success-message" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-            <span className="success-icon">✓</span>
-            {successMessage}
-          </div>
-        )}
-
-        <div className="form-actions">
-          <button
-            type="button"
-            className="btn-cancel"
-            onClick={onCancel}
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="btn-animated btn-primary"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <span className="spinner" style={{ 
-                  display: 'inline-block', 
-                  width: '14px', 
-                  height: '14px', 
-                  border: '2px solid #fff',
-                  borderTop: '2px solid transparent',
-                  borderRadius: '50%',
-                  marginRight: '8px'
-                }} />
-                Verifying...
-              </>
-            ) : (
-              'Verify Travel Details'
-            )}
-          </button>
-        </div>
-      </form>
-
-      <style>{`
-        .travel-verification-form {
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 24px;
-          background: white;
-          border-radius: 8px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .verification-header {
-          margin-bottom: 24px;
-          text-align: center;
-        }
-
-        .verification-header h2 {
-          margin: 0 0 8px 0;
-          color: #1f2937;
-          font-size: 24px;
-        }
-
-        .verification-header p {
-          margin: 0;
-          color: #6b7280;
-          font-size: 14px;
-        }
-
-        .verification-form-content {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
-
-        .form-section {
-          border-bottom: 1px solid #e5e7eb;
-          padding-bottom: 16px;
-        }
-
-        .form-section:last-of-type {
-          border-bottom: none;
-        }
-
-        .form-section h3 {
-          margin: 0 0 16px 0;
-          color: #374151;
-          font-size: 16px;
-          font-weight: 600;
-        }
-
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          margin-bottom: 12px; 
-        }
-
-        .form-label {
-          font-size: 14px;
-          font-weight: 500;
-          color: #374151;
-        }
-
-        .form-input-animated {
-          padding: 10px 12px;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          font-size: 14px;
-          font-family: inherit;
-        }
-
-        .form-input-animated:disabled {
-          background-color: #f3f4f6;
-          color: #9ca3af;
-          cursor: not-allowed;
-        }
-
-        .form-group small {
-          font-size: 12px;
-          color: #9ca3af;
-        }
-
-        .form-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 16px;
-        }
-
-        .error-message {
-          padding: 12px;
-          background-color: rgba(239, 68, 68, 0.1);
-          border: 1px solid rgba(239, 68, 68, 0.3);
-          border-radius: 6px;
-          color: #dc2626;
-          font-size: 14px;
-        }
-
-        .success-message {
-          padding: 12px;
-          background-color: rgba(34, 197, 94, 0.1);
-          border: 1px solid rgba(34, 197, 94, 0.3);
-          border-radius: 6px;
-          color: #16a34a;
-          font-size: 14px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .success-icon {
-          font-weight: bold;
-          font-size: 16px;
-        }
-
-        .form-actions {
-          display: flex;
-          gap: 12px;
-          justify-content: flex-end;
-          margin-top: 16px;
-        }
-
-        .btn-primary {
-          padding: 10px 24px;
-          background-color: #2596be;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-          background-color: #1d7a9a;
-        }
-
-        .btn-cancel {
-          padding: 10px 24px;
-          background-color: #e5e7eb;
-          color: #374151;
-          border: none;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-        }
-
-        .btn-cancel:hover:not(:disabled) {
-          background-color: #d1d5db;
-        }
-
-        .btn-cancel:disabled,
-        .btn-primary:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        @media (max-width: 768px) {
-          .travel-verification-form {
-            padding: 16px;
-          }
-
-          .form-row {
-            grid-template-columns: 1fr;
-          }
-
-          .form-actions {
-            flex-direction: column-reverse;
-          }
-
-          .form-actions button {
-            width: 100%;
-          }
-        }
-      `}</style>
-    </div>
+      {/* Form Actions */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button
+          type="submit"
+          disabled={isLoading || isFetchingRoute}
+          className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors"
+        >
+          {isLoading ? '⏳ Verifying...' : '✅ Verify & Continue'}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isLoading || isFetchingRoute}
+          className="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-800 font-semibold rounded-lg transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
   );
 };
 

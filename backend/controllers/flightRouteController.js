@@ -13,20 +13,25 @@ const { getFlightRoute } = require('../services/FlightRouteService');
  */
 const getFlightRouteHandler = async (req, res) => {
   try {
-    const { airline, flightNumber, dateOfTravel } = req.query;
+    const { flight, date } = req.query;
+    
+    // Support both old format (airline, flightNumber, dateOfTravel) and new format (flight, date)
+    const airline = req.query.airline;
+    const flightNumber = req.query.flightNumber || flight;
+    const dateOfTravel = req.query.dateOfTravel || date;
 
     // Validate required parameters
-    if (!airline || !flightNumber || !dateOfTravel) {
+    if (!flightNumber || !dateOfTravel) {
       return res.status(400).json({
         error: 'Missing required parameters',
-        required: ['airline', 'flightNumber', 'dateOfTravel'],
+        required: ['flight (or airline+flightNumber)', 'date (or dateOfTravel)'],
       });
     }
 
-    console.log(`\n📡 [API] Flight route request: ${airline}${flightNumber} on ${dateOfTravel}`);
+    console.log(`\n📡 [API] Flight route request: ${flightNumber} on ${dateOfTravel}`);
 
     // Fetch flight route from APIs
-    const flightRoute = await getFlightRoute(airline, flightNumber, dateOfTravel);
+    const flightRoute = await getFlightRoute(airline || flightNumber.slice(0, 2), flightNumber.slice(-flightNumber.length + 2) || flightNumber, dateOfTravel);
 
     if (!flightRoute) {
       return res.status(404).json({

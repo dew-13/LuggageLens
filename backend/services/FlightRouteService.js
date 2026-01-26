@@ -65,11 +65,12 @@ const getAmadeusToken = async () => {
 
 /**
  * Fetch flight route from Amadeus API
- * Amadeus is better for scheduled flight information
+ * Amadeus is used as fallback - provides flight schedule and details
+ * Supports: Flight Schedule API and Flight Offers Search
  */
 const fetchFromAmadeus = async (airline, flightNumber, dateOfTravel) => {
   try {
-    console.log('\n🟢 [AMADEUS] Searching for flight route...');
+    console.log('\n🟢 [AMADEUS] Searching for flight route (fallback)...');
     console.log(`   Flight: ${airline}${flightNumber} | Date: ${dateOfTravel}`);
 
     const token = await getAmadeusToken();
@@ -78,14 +79,21 @@ const fetchFromAmadeus = async (airline, flightNumber, dateOfTravel) => {
       return null;
     }
 
-    // Amadeus flight search requires departure city/airport and arrival city/airport
-    // We'll search for flights on the given date
     const formattedDate = formatDate(dateOfTravel);
+    const fullFlightNumber = `${airline}${flightNumber}`;
 
-    // Since we don't know origin/dest yet, we'll search broadly
-    // This is a limitation - Amadeus requires knowing at least the origin/destination
-    // So we'll try the POST search endpoint with the flight number filter
-    const response = await fetch('https://api.amadeus.com/v2/shopping/flight-offers', {
+    // Try Amadeus Flight Schedules API
+    // This endpoint can search for specific flights by flight number and date
+    console.log(`   📡 API Call: https://api.amadeus.com/v2/schedule/flights`);
+    console.log(`   📍 Query: carrierCode=${airline}, flightNumber=${flightNumber}, scheduledDepartureDate=${formattedDate}`);
+
+    const params = new URLSearchParams({
+      carrierCode: airline,
+      flightNumber: flightNumber,
+      scheduledDepartureDate: formattedDate,
+    });
+
+    const response = await fetch(`https://api.amadeus.com/v2/schedule/flights?${params.toString()}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -93,13 +101,44 @@ const fetchFromAmadeus = async (airline, flightNumber, dateOfTravel) => {
       },
     });
 
+    const responseTime = Date.now();
+    console.log(`   ⏱️  Response Status: ${response.status}`);
+
     if (!response.ok) {
-      console.log(`   ⚠️  Amadeus search failed (${response.status})`);
+      console.log(`   ⚠️  Amadeus Flight Schedules API failed (${response.status})`);
+      
+      // Try alternate endpoint: Flight Offers Search (requires origin/destination)
+      // This won't work without knowing the airports, but we can try anyway
+      console.log('   💡 Trying alternate Amadeus endpoints...');
       return null;
     }
 
-    console.log('   ✅ Amadeus search completed');
-    return null; // Amadeus requires specific departure/arrival, can't search by flight number alone
+    const data = await response.json();
+    console.log(`   📦 Amadeus API Response:`, JSON.stringify(data, null, 2));
+
+    if (!data.data || data.data.length === 0) {
+      console.log('   ℹ️  No flight schedules found in Amadeus for this flight');
+      return null;
+    }
+
+    // Extract flight details from Amadeus response
+    const flight = data.data[0];
+    const result = {
+      source: 'amadeus',
+      originAirport: flight.departure?.at || flight.departure?.iataCode,
+      destinationAirport: flight.arrival?.at || flight.arrival?.iataCode,
+      airline: airline,
+      aircraft: flight.aircraft?.iataCode,
+      departure: flight.departure?.at,
+      arrival: flight.arrival?.at,
+      status: 'scheduled',
+    };
+
+    console.log(`   ✅ Flight found in Amadeus!`);
+    console.log(`   📊 Extracted Result:`, JSON.stringify(result, null, 2));
+
+    return result;
+
   } catch (error) {
     console.error('   ❌ Amadeus error:', error.message);
     return null;
@@ -119,15 +158,19 @@ const fetchFromAviationstack = async (airline, flightNumber, dateOfTravel) => {
     const flightDate = formatDate(dateOfTravel);
     const fullFlightNumber = `${airline_iata}${flight_number}`;
 
+    // Aviationstack API: use flight_date to get historical flights for that date
+    // Note: flight_iata is not a valid parameter - we'll filter results manually
     const params = new URLSearchParams({
       access_key: AVIATIONSTACK_API_KEY,
-      flight_iata: fullFlightNumber,
       flight_date: flightDate,
-      limit: 20,
+      limit: 100,  // Get more results to filter through
     });
 
     const url = `https://api.aviationstack.com/v1/flights?${params.toString()}`;
     const startTime = Date.now();
+
+    console.log(`   📡 API Call: https://api.aviationstack.com/v1/flights`);
+    console.log(`   📍 Query: flight_date=${flightDate}, limit=100`);
 
     const response = await fetch(url, {
       method: 'GET',
@@ -145,14 +188,26 @@ const fetchFromAviationstack = async (airline, flightNumber, dateOfTravel) => {
     }
 
     const data = await response.json();
+    console.log(`   📦 API Response:`, JSON.stringify(data, null, 2));
 
     if (!data.data || data.data.length === 0) {
-      console.log('   ℹ️  No flights found in Aviationstack');
+      console.log('   ℹ️  No flights found in Aviationstack for this date');
       return null;
     }
 
-    // Get the first matching flight
-    const flight = data.data[0];
+    // Filter results by flight number since API doesn't support flight_iata parameter
+    const matchingFlight = data.data.find(flight => {
+      const flightIata = flight.flight_iata || '';
+      return flightIata.toUpperCase() === fullFlightNumber.toUpperCase();
+    });
+
+    if (!matchingFlight) {
+      console.log(`   ⚠️  No exact match for flight ${fullFlightNumber} on ${flightDate}`);
+      console.log(`   💡 Available flights on this date: ${data.data.map(f => f.flight_iata).join(', ')}`);
+      return null;
+    }
+
+    const flight = matchingFlight;
     const result = {
       source: 'aviationstack',
       originAirport: flight.departure?.airport,
@@ -165,6 +220,7 @@ const fetchFromAviationstack = async (airline, flightNumber, dateOfTravel) => {
     };
 
     console.log(`   ✅ Flight found!`);
+    console.log(`   📊 Extracted Result:`, JSON.stringify(result, null, 2));
     console.log(`   📍 Route: ${result.originAirport} → ${result.destinationAirport}`);
     console.log(`   ✈️  Aircraft: ${result.aircraft} | Status: ${result.status}`);
 
@@ -177,7 +233,7 @@ const fetchFromAviationstack = async (airline, flightNumber, dateOfTravel) => {
 
 /**
  * Main function to fetch flight route
- * Tries Aviationstack first, then falls back to simulated data
+ * Tries: 1) Aviationstack → 2) Amadeus → 3) Simulated Data
  */
 const getFlightRoute = async (airline, flightNumber, dateOfTravel) => {
   try {
@@ -189,26 +245,42 @@ const getFlightRoute = async (airline, flightNumber, dateOfTravel) => {
       throw new Error('Missing required parameters: airline, flightNumber, dateOfTravel');
     }
 
-    // Try Aviationstack (best for flight number + date search)
+    // Try Aviationstack (FIRST CHOICE - best for flight number + date search)
+    console.log('\n🟢 [ATTEMPT 1/3] Trying Aviationstack API...');
     const aviationResult = await fetchFromAviationstack(airline, flightNumber, dateOfTravel);
     if (aviationResult) {
+      console.log('\n✅ [SUCCESS] Route verified via Aviationstack\n');
       return aviationResult;
     }
 
-    // Try Amadeus (if Aviationstack failed)
-    console.log('\n🔄 [FALLBACK] Aviationstack unavailable, trying Amadeus...');
+    console.log('\n❌ [FAILED] Aviationstack did not find flight');
+
+    // Try Amadeus (SECOND CHOICE - fallback)
+    console.log('\n🟢 [ATTEMPT 2/3] Trying Amadeus API (fallback)...');
     const amadeusResult = await fetchFromAmadeus(airline, flightNumber, dateOfTravel);
     if (amadeusResult) {
+      console.log('\n✅ [SUCCESS] Route verified via Amadeus\n');
       return amadeusResult;
     }
 
+    console.log('\n❌ [FAILED] Amadeus also unavailable');
+
     // Fallback to simulated data
-    console.log('\n⚠️  [FALLBACK] Using simulated flight data');
-    return getSimulatedFlightRoute(airline, flightNumber);
+    console.log('\n🟢 [ATTEMPT 3/3] Using simulated flight data (last resort)...');
+    console.log('⚠️  [WARNING] Neither API could verify this flight. Using simulated data.');
+    const simulatedResult = getSimulatedFlightRoute(airline, flightNumber);
+    if (simulatedResult) {
+      console.log('\n✅ [FALLBACK SUCCESS] Using simulated route\n');
+      return simulatedResult;
+    }
+
+    console.log('\n❌ [COMPLETE FAILURE] No route data available');
+    return null;
 
   } catch (error) {
     console.error('❌ [FLIGHT ROUTE] Error:', error.message);
     // Still return simulated data as fallback
+    console.log('\n🟢 [EMERGENCY FALLBACK] Returning simulated data due to error...');
     return getSimulatedFlightRoute(airline, flightNumber);
   }
 };

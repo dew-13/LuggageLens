@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import '../animations.css';
@@ -6,9 +6,18 @@ import '../animations.css';
 export default function PassengerNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -16,12 +25,12 @@ export default function PassengerNavigation() {
   };
 
   return (
-    <nav className="border-b border-gray-200 shadow-sm" style={{ backgroundColor: '#ddfce6' }}>
+    <nav className={`border-transparent fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-slate-900/70 backdrop-blur-md' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-12">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/passenger/dashboard" className="text-base font-bold" style={{ color: '#123458' }}>
+            <Link to="/passenger/dashboard" className="text-base font-bold text-white drop-shadow-md">
               BaggageLens
             </Link>
 
@@ -31,29 +40,25 @@ export default function PassengerNavigation() {
           <div className="hidden md:flex items-center gap-8 text-sm">
             <Link
               to="/passenger/dashboard"
-              className={`nav-item-animated font-medium text-sm transition-colors px-3 py-1 rounded ${location.pathname === '/passenger/dashboard' ? 'bg-green-100' : ''}`}
-              style={{ color: '#123458' }}
+              className={`nav-item-animated font-medium text-sm transition-colors text-white drop-shadow-md ${location.pathname === '/passenger/dashboard' ? 'text-green-300' : ''}`}
             >
               Dashboard
             </Link>
             <Link
               to="/passenger/cases"
-              className="nav-item-animated font-medium text-sm transition-colors"
-              style={{ color: '#123458' }}
+              className={`nav-item-animated font-medium text-sm transition-colors text-white drop-shadow-md ${location.pathname === '/passenger/cases' ? 'text-green-300' : ''}`}
             >
               My Cases
             </Link>
             <Link
               to="/passenger/matches"
-              className="nav-item-animated font-medium text-sm transition-colors"
-              style={{ color: '#123458' }}
+              className={`nav-item-animated font-medium text-sm transition-colors text-white drop-shadow-md ${location.pathname === '/passenger/matches' ? 'text-green-300' : ''}`}
             >
               Matches
             </Link>
             <Link
               to="/passenger/report"
-              className="nav-item-animated font-medium text-sm transition-colors px-3 py-1 rounded"
-              style={{ color: '#123458' }}
+              className={`nav-item-animated font-medium text-sm transition-colors px-3 py-1 rounded text-white drop-shadow-md ${location.pathname === '/passenger/report' ? 'text-green-300' : ''}`}
             >
               Report Lost
             </Link>
@@ -61,23 +66,23 @@ export default function PassengerNavigation() {
 
           {/* Profile & Mobile Menu */}
           <div className="flex items-center gap-4">
-            {/* Profile Dropdown */}
-            <div className="relative">
+            {/* Profile Dropdown - Desktop Only */}
+            <div className="hidden md:block relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-2 text-sm"
-                style={{ color: '#123458' }}
+                className="flex items-center gap-2 text-sm text-white drop-shadow-md"
               >
-                <div className="ml-2 px-3 py-1 bg-green-100 text-xs font-semibold rounded-full" style={{ color: '#123458' }}>
-                    
-         P
+                <div className="ml-2 p-1.5 text-white drop-shadow-md">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
                 </div>
               </button>
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                   <div className="p-4 border-b border-gray-200">
                     <p className="font-medium" style={{ color: '#123458' }}>Passenger</p>
-                    <p className="text-xs" style={{ color: '#123458' }}>passenger@baggage.com</p>
+                    <p className="text-xs" style={{ color: '#123458' }}>{user?.email || 'passenger@baggage.com'}</p>
                   </div>
                   <button className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm" style={{ color: '#123458' }}>
                     Profile
@@ -95,8 +100,7 @@ export default function PassengerNavigation() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden"
-              style={{ color: '#123458' }}
+              className="md:hidden text-white drop-shadow-md"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -107,35 +111,40 @@ export default function PassengerNavigation() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 card-animated">
+          <div className="md:hidden py-4 bg-slate-800 border-t border-slate-600 card-animated">
+            <div className="px-4 py-2 mb-4 flex items-center gap-2 text-white border-b border-slate-600 pb-4">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              </svg>
+              <span className="text-sm font-medium">Passenger</span>
+            </div>
             <Link
               to="/passenger/dashboard"
-              className={`block px-4 py-2 hover:bg-gray-50 rounded ${location.pathname === '/passenger/dashboard' ? 'bg-green-100' : ''}`}
-              style={{ color: '#123458' }}
+              className={`block px-4 py-2 rounded text-white transition-colors hover:bg-slate-700 ${location.pathname === '/passenger/dashboard' ? 'bg-blue-600' : ''}`}
             >
               Dashboard
             </Link>
             <Link
               to="/passenger/cases"
-              className="block px-4 py-2 hover:bg-gray-50 rounded"
-              style={{ color: '#123458' }}
+              className={`block px-4 py-2 rounded text-white transition-colors hover:bg-slate-700 ${location.pathname === '/passenger/cases' ? 'bg-blue-600' : ''}`}
             >
               My Cases
             </Link>
             <Link
               to="/passenger/matches"
-              className="block px-4 py-2 hover:bg-gray-50 rounded"
-              style={{ color: '#123458' }}
+              className={`block px-4 py-2 rounded text-white transition-colors hover:bg-slate-700 ${location.pathname === '/passenger/matches' ? 'bg-blue-600' : ''}`}
             >
               Matches
             </Link>
             <Link
               to="/passenger/report"
-              className="block px-4 py-2 hover:bg-blue-50 rounded font-medium"
-              style={{ color: '#123458' }}
+              className={`block px-4 py-2 rounded font-medium text-white transition-colors hover:bg-slate-700 ${location.pathname === '/passenger/report' ? 'bg-blue-600' : ''}`}
             >
               Report Lost
             </Link>
+            <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-300 hover:bg-slate-700 text-sm mt-2 rounded transition-colors">
+              Logout
+            </button>
           </div>
         )}
       </div>

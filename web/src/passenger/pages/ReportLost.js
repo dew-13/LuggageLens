@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import PassengerNavigation from '../components/PassengerNavigation';
 import TravelVerificationForm from '../components/TravelVerificationForm';
 import ReportForm from '../components/ReportForm';
+import baggageClaimImage from '../../images/baggage claim.jpg';
 import '../animations.css';
 
 export default function ReportLost() {
@@ -48,10 +49,32 @@ export default function ReportLost() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div
+      className="min-h-screen pt-16 relative"
+      style={{
+        backgroundImage: `url('${baggageClaimImage}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Overlay for better text readability */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(16, 46, 74, 0.9)',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      />
+      
       <PassengerNavigation />
       
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -61,7 +84,7 @@ export default function ReportLost() {
               }`}>
                 1
               </div>
-              <p className="text-sm mt-2 text-gray-700">Travel Verification</p>
+              <span className="text-white text-sm mt-2 font-medium">Verify Travel</span>
             </div>
             
             <div className={`flex-1 h-1 mx-4 ${step === 'report' ? 'bg-blue-600' : 'bg-gray-300'}`} />
@@ -72,17 +95,17 @@ export default function ReportLost() {
               }`}>
                 2
               </div>
-              <p className="text-sm mt-2 text-gray-700">Luggage Details</p>
+              <p className="text-white text-sm mt-2 font-medium">Luggage Details</p>
             </div>
           </div>
         </div>
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-white">
             {step === 'verification' ? 'Report Lost Luggage' : 'Describe Your Luggage'}
           </h1>
-          <p className="text-gray-600 mt-2 text-sm">
+          <p className="text-white mt-2 text-sm">
             {step === 'verification' 
               ? 'First, verify your travel details to expedite the recovery process.'
               : 'Now tell us about your lost luggage so we can help find it.'}
@@ -115,12 +138,12 @@ export default function ReportLost() {
           <div>
             {/* Verification Summary */}
             <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-blue-900 text-sm font-medium">
+              <p className="text-blue-900 text-xs font-medium">
                 ✓ Travel verified: {verificationData.travelData.flightNumber} on {verificationData.travelData.dateOfTravel}
               </p>
               <button
                 onClick={handleVerificationCancel}
-                className="text-blue-600 text-sm underline mt-2 hover:text-blue-800"
+                className="text-blue-600 text-xs underline mt-2 hover:text-blue-800"
               >
                 Edit travel details
               </button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import StaffNavigation from '../components/StaffNavigation';
 import MatchesList from '../components/MatchesList';
+import baggageClaimImage from '../../images/baggage claim.jpg';
 
 export default function StaffMatches() {
   const [matches, setMatches] = useState([]);
@@ -16,16 +17,16 @@ export default function StaffMatches() {
       setMatches([
         {
           id: 1,
-          lostImage: 'https://via.placeholder.com/150',
-          foundImage: 'https://via.placeholder.com/150',
+          lostImage: '',
+          foundImage: '',
           similarity: 0.94,
           status: 'pending',
           date: '2026-01-12'
         },
         {
           id: 2,
-          lostImage: 'https://via.placeholder.com/150',
-          foundImage: 'https://via.placeholder.com/150',
+          lostImage: '',
+          foundImage: '',
           similarity: 0.87,
           status: 'confirmed',
           date: '2026-01-11'
@@ -37,7 +38,15 @@ export default function StaffMatches() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div
+      className="min-h-screen pt-16"
+      style={{
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('${baggageClaimImage}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       <StaffNavigation />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

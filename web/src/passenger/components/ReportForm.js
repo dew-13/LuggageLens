@@ -29,51 +29,51 @@ export default function ReportForm({ onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Description */}
         <div className="md:col-span-2 card-animated">
-          <label className="block text-xs font-medium text-gray-700 mb-2">Description *</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Description *</label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             placeholder="Describe your luggage in detail..."
             required
-            className="form-input-animated w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows="4"
+            className="form-input-animated w-full px-3 py-1.5 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
           />
         </div>
 
         {/* Color */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-2">Color</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Color</label>
           <input
             type="text"
             name="color"
             value={formData.color}
             onChange={handleChange}
             placeholder="e.g., Black, Red, Blue"
-            className="form-input-animated w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input-animated w-full px-3 py-1.5 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* Brand */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-2">Brand</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Brand</label>
           <input
             type="text"
             name="brand"
             value={formData.brand}
             onChange={handleChange}
             placeholder="e.g., Samsonite, Louis Vuitton"
-            className="form-input-animated w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input-animated w-full px-3 py-1.5 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* Report Date */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-2">Date Lost *</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Date Lost *</label>
           <input
             type="date"
             name="reportDate"
