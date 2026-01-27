@@ -293,7 +293,7 @@ export default function LoginPage() {
             onClick={() => setIsSignUp(false)}
             className={`flex-1 py-3 font-bold text-sm transition-colors ${!isSignUp ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
           >
-            Sign In
+            Log In
           </button>
           <button
             onClick={() => setIsSignUp(true)}

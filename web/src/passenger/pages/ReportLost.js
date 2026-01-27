@@ -5,10 +5,13 @@ import ReportForm from '../components/ReportForm';
 import baggageClaimImage from '../../images/baggage claim.jpg';
 import '../animations.css';
 
+import useLuggageStore from '../../store/luggageStore';
+
 export default function ReportLost() {
   const [step, setStep] = useState('verification'); // 'verification' or 'report'
   const [verificationData, setVerificationData] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const addCase = useLuggageStore(state => state.addCase);
 
   const handleVerificationComplete = (verificationResult) => {
     // Store verification data for luggage report
@@ -29,13 +32,18 @@ export default function ReportLost() {
       const completeReport = {
         ...formData,
         verification: verificationData,
+        date: new Date().toISOString(),
+        status: 'pending'
       };
 
       console.log('Submitting complete report with verification:', completeReport);
-      
+
+      // Update local store state
+      addCase(completeReport);
+
       // TODO: Replace with actual API call to backend
       // POST to /api/report-lost-luggage with completeReport
-      
+
       setSubmitted(true);
       setTimeout(() => {
         // Reset after success
@@ -59,7 +67,7 @@ export default function ReportLost() {
       }}
     >
       {/* Overlay for better text readability */}
-      <div 
+      <div
         style={{
           position: 'fixed',
           top: 0,
@@ -71,31 +79,29 @@ export default function ReportLost() {
           pointerEvents: 'none'
         }}
       />
-      
+
       <PassengerNavigation />
-      
+
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className={`flex flex-col items-center ${step === 'verification' ? '' : 'opacity-60'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                step === 'verification' ? 'bg-blue-600' : 'bg-gray-400'
-              }`}>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-white text-sm sm:text-base ${step === 'verification' ? 'bg-blue-600' : 'bg-gray-400'
+                }`}>
                 1
               </div>
-              <span className="text-white text-sm mt-2 font-medium">Verify Travel</span>
+              <span className="text-white text-xs sm:text-sm mt-2 font-medium text-center">Verify Travel</span>
             </div>
-            
-            <div className={`flex-1 h-1 mx-4 ${step === 'report' ? 'bg-blue-600' : 'bg-gray-300'}`} />
-            
+
+            <div className={`flex-1 h-1 mx-2 sm:mx-4 ${step === 'report' ? 'bg-blue-600' : 'bg-gray-300'}`} />
+
             <div className={`flex flex-col items-center ${step === 'report' ? '' : 'opacity-60'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                step === 'report' ? 'bg-blue-600' : 'bg-gray-400'
-              }`}>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-white text-sm sm:text-base ${step === 'report' ? 'bg-blue-600' : 'bg-gray-400'
+                }`}>
                 2
               </div>
-              <p className="text-white text-sm mt-2 font-medium">Luggage Details</p>
+              <p className="text-white text-xs sm:text-sm mt-2 font-medium text-center">Luggage Details</p>
             </div>
           </div>
         </div>
@@ -106,7 +112,7 @@ export default function ReportLost() {
             {step === 'verification' ? 'Report Lost Luggage' : 'Describe Your Luggage'}
           </h1>
           <p className="text-white mt-2 text-sm">
-            {step === 'verification' 
+            {step === 'verification'
               ? 'First, verify your travel details to expedite the recovery process.'
               : 'Now tell us about your lost luggage so we can help find it.'}
           </p>
@@ -127,7 +133,7 @@ export default function ReportLost() {
 
         {/* Step 1: Travel Verification */}
         {step === 'verification' && (
-          <TravelVerificationForm 
+          <TravelVerificationForm
             onVerificationComplete={handleVerificationComplete}
             onCancel={handleVerificationCancel}
           />
@@ -149,7 +155,7 @@ export default function ReportLost() {
               </button>
             </div>
 
-            <ReportForm 
+            <ReportForm
               onSubmit={handleReportSubmit}
               verificationData={verificationData}
             />

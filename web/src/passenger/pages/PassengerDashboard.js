@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PassengerNavigation from '../components/PassengerNavigation';
 import MyLuggageSummary from '../components/MyLuggageSummary';
 import MatchesHighlights from '../components/MatchesHighlights';
@@ -7,40 +7,27 @@ import baggageBeltVideo from '../../images/baggage belt.mp4';
 // import heroImage from '../../images/hero.avif';
 import '../animations.css';
 
-export default function PassengerDashboard() {
-  const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    lostReports: 0,
-    foundMatches: 0,
-    pendingCases: 0,
-    resolvedCases: 0
-  });
-  useEffect(() => {
-    fetchStats();
-  }, []);
+import useLuggageStore from '../../store/luggageStore';
 
-  const fetchStats = async () => {
-    try {
-      // TODO: Replace with actual API call
-      setStats({
-        lostReports: 2,
-        foundMatches: 1,
-        pendingCases: 1,
-        resolvedCases: 2
-      });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    }
+export default function PassengerDashboard() {
+  const cases = useLuggageStore(state => state.cases);
+  const matches = useLuggageStore(state => state.matches);
+
+  const stats = {
+    lostReports: cases.length,
+    foundMatches: matches.length,
+    pendingCases: cases.filter(c => c.status === 'pending').length,
+    resolvedCases: cases.filter(c => c.status === 'resolved' || c.status === 'matched').length
   };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'transparent' }}>
       <PassengerNavigation />
-      
+
       {/* Hero Section */}
-      <div 
-        className="relative overflow-hidden" 
-        style={{ 
+      <div
+        className="relative overflow-hidden"
+        style={{
           position: 'relative',
           minHeight: '500px'
         }}
@@ -67,7 +54,7 @@ export default function PassengerDashboard() {
         </video>
 
         {/* Overlay for better text readability */}
-        <div 
+        <div
           style={{
             position: 'absolute',
             top: 0,
@@ -78,19 +65,19 @@ export default function PassengerDashboard() {
             zIndex: 1
           }}
         />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-60 relative z-10 mt-8">
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-32 lg:py-60 relative z-10 mt-8">
           <div className="text-center">
-            <h1 className="text-xl md:text-3xl lg:text-3xl font-bold text-white mb-6" style={{ background: 'linear-gradient(135deg, #10ff66 0%, #00d4ff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6" style={{ background: 'linear-gradient(135deg, #10ff66 0%, #00d4ff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               Welcome to BaggageLens
             </h1>
-            <p className="text-sm md:text-base text-white mb-10 max-w-3xl mx-auto" style={{ color: '#e0e0e0' }}>
-              Lost your luggage? <br></br>Our AI-powered system helps you find your missing baggage quickly and efficiently.
+            <p className="text-base md:text-xl text-white mb-10 max-w-3xl mx-auto" style={{ color: '#e0e0e0' }}>
+              Lost your luggage? <br className="hidden md:block" />Our AI-powered system helps you find your missing baggage quickly and efficiently.
             </p>
             <Link
               to="/passenger/report"
-              className="inline-block btn-animated px-4 py-2 rounded-lg text-sm font-semibold transform hover:scale-105 transition-all duration-200"
-              style={{ 
+              className="inline-block btn-animated px-8 py-4 rounded-lg text-lg font-semibold transform hover:scale-105 transition-all duration-200"
+              style={{
                 background: 'rgba(20, 40, 60, 0.4)',
                 backgroundImage: 'linear-gradient(rgba(20, 40, 60, 0.4), rgba(20, 40, 60, 0.4)), linear-gradient(135deg, #10ff66 0%, #00d4ff 100%)',
                 backgroundClip: 'padding-box, border-box',
@@ -120,7 +107,7 @@ export default function PassengerDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="stat-card rounded-lg shadow-sm p-6" style={{ backgroundColor: '#f1f1f1', borderWidth: '1px', borderColor: '#2596be' }}>
             <div className="flex items-center justify-between">
               <div>

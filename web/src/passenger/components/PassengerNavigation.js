@@ -84,12 +84,10 @@ export default function PassengerNavigation() {
                     <p className="font-medium" style={{ color: '#123458' }}>Passenger</p>
                     <p className="text-xs" style={{ color: '#123458' }}>{user?.email || 'passenger@baggage.com'}</p>
                   </div>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm" style={{ color: '#123458' }}>
+                  <Link to="/passenger/profile" className="block w-full text-left px-4 py-2 hover:bg-gray-50 text-sm" style={{ color: '#123458' }}>
                     Profile
-                  </button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm" style={{ color: '#123458' }}>
-                    Settings
-                  </button>
+                  </Link>
+
                   <button onClick={handleLogout} className="w-full text-left px-4 py-2 hover:bg-red-50 text-sm" style={{ color: '#123458' }}>
                     Logout
                   </button>
@@ -142,6 +140,13 @@ export default function PassengerNavigation() {
             >
               Report Lost
             </Link>
+            <Link
+              to="/passenger/profile"
+              className={`block px-4 py-2 rounded text-white transition-colors hover:bg-slate-700 ${location.pathname === '/passenger/profile' ? 'bg-blue-600' : ''}`}
+            >
+              Profile
+            </Link>
+
             <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-300 hover:bg-slate-700 text-sm mt-2 rounded transition-colors">
               Logout
             </button>

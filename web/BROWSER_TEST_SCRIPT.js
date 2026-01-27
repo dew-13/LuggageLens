@@ -238,11 +238,11 @@ const FlowTests = {
     
     TestSuites.testLandingPage();
     
-    // Click sign in
+    // Click log in
     const signInButtons = document.querySelectorAll('a[href="/login"], button:contains("Sign In")');
     if (signInButtons.length > 0) {
-      console.log('ℹ️  Ready to click Sign In button');
-      console.log('Manual step required: Click a Sign In button to proceed to login page');
+      console.log('ℹ️  Ready to click Log In button');
+      console.log('Manual step required: Click a Log In button to proceed to login page');
     }
   },
 

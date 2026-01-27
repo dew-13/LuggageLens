@@ -182,6 +182,32 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
     return selectedDate <= today; // Must be today or in past (NOT future)
   };
 
+  // Helper to find airport code from name or code
+  const findBestMatchingAirport = (searchString) => {
+    if (!searchString) return '';
+
+    const search = searchString.toString().toUpperCase().trim();
+
+    // 1. Exact Code Match
+    const exactCode = AIRPORTS.find(a => a.code === search);
+    if (exactCode) return exactCode.code;
+
+    // 2. Exact Name Match (case insensitive)
+    const exactName = AIRPORTS.find(a => a.name.toUpperCase() === search);
+    if (exactName) return exactName.code;
+
+    // 3. Contains Name Match (e.g. "Heathrow" in "London Heathrow Airport")
+    const partialName = AIRPORTS.find(a => a.name.toUpperCase().includes(search));
+    if (partialName) return partialName.code;
+
+    // 4. Reverse Contains Match (e.g. search "London Heathrow Airport" and list has "Heathrow")
+    // Less common but possible if list name is shorter
+    const reversePartial = AIRPORTS.find(a => search.includes(a.name.toUpperCase()));
+    if (reversePartial) return reversePartial.code;
+
+    return '';
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     const newErrors = { ...validationErrors };
@@ -233,33 +259,50 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
     }
 
     setValidationErrors(newErrors);
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+
+    setFormData(prev => {
+      const updates = { [name]: value };
+
+      // Auto-fill flight number with airline code when airline changes
+      // This allows the user to just type the digits (e.g. UL -> user types 605 -> UL605)
+      if (name === 'airline') {
+        updates.flightNumber = value;
+      }
+
+      return { ...prev, ...updates };
+    });
+
     setError(null);
     setSuccessMessage(null);
   };
 
   const fetchAndAutoFillAirports = async (airline, flightNumber, dateOfTravel) => {
     if (isFetchingRoute) return; // Prevent multiple simultaneous requests
-    
+
     setIsFetchingRoute(true);
     setError(null);
     setSuccessMessage(null);
-    
+
     try {
       console.log('🔍 [AUTO-FILL] Starting fetch for:', airline, flightNumber, dateOfTravel);
-      
+
       const flightRoute = await fetchFlightRoute(airline, flightNumber, dateOfTravel);
-      
-      if (flightRoute && flightRoute.originAirport && flightRoute.destinationAirport) {
+
+      if (flightRoute && (flightRoute.originAirport || flightRoute.originIata)) {
         console.log('✅ [AUTO-FILL] Successfully fetched route:', flightRoute.originAirport, '→', flightRoute.destinationAirport);
+
+        // Resolve best matching codes for dropdowns
+        const originCode = findBestMatchingAirport(flightRoute.originIata || flightRoute.originAirport);
+        const destCode = findBestMatchingAirport(flightRoute.destinationIata || flightRoute.destinationAirport);
+
+        console.log(`   Resolved Codes: Origin=${originCode} (from ${flightRoute.originAirport}), Dest=${destCode} (from ${flightRoute.destinationAirport})`);
+
         setFormData(prev => ({
           ...prev,
-          originAirport: flightRoute.originAirport,
-          destinationAirport: flightRoute.destinationAirport
+          originAirport: originCode,
+          destinationAirport: destCode
         }));
+
         setRouteInfo(flightRoute);
         setError(null);
         setSuccessMessage(`✅ Flight route auto-filled: ${flightRoute.originAirport} → ${flightRoute.destinationAirport}`);
@@ -406,9 +449,8 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
             name="lastName"
             value={formData.lastName}
             onChange={handleChange}
-            className={`w-full px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-              validationErrors.lastName ? 'border-red-500 bg-red-50' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.lastName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              }`}
             placeholder="Enter your last name"
             disabled={isLoading}
           />
@@ -436,9 +478,8 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
                 name="airline"
                 value={formData.airline}
                 onChange={handleFlightDetailsChange}
-                className={`w-full px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                  validationErrors.airline ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.airline ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                 disabled={isLoading}
               >
                 <option value="">Select Airline</option>
@@ -463,9 +504,8 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
                 name="flightNumber"
                 value={formData.flightNumber}
                 onChange={handleFlightDetailsChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                  validationErrors.flightNumber ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.flightNumber ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                 placeholder="e.g., AA123, BA456"
                 disabled={isLoading}
               />
@@ -486,9 +526,8 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
               value={formData.dateOfTravel}
               onChange={handleFlightDetailsChange}
               max={today}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                validationErrors.dateOfTravel ? 'border-red-500 bg-red-50' : 'border-gray-300'
-              }`}
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.dateOfTravel ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
               disabled={isLoading}
             />
             {validationErrors.dateOfTravel && (
@@ -545,9 +584,8 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
                 name="originAirport"
                 value={formData.originAirport}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                  validationErrors.originAirport ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.originAirport ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                 disabled={isLoading || isFetchingRoute}
               >
                 <option value="">Select Origin Airport</option>
@@ -574,9 +612,8 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
                 name="destinationAirport"
                 value={formData.destinationAirport}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                  validationErrors.destinationAirport ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.destinationAirport ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                 disabled={isLoading || isFetchingRoute}
               >
                 <option value="">Select Destination Airport</option>

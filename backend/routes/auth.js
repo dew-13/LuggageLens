@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const { Resend } = require('resend');
 const User = require('../models/User');
+const { authenticateToken } = require('../middleware/auth'); // Import middleware
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
@@ -73,7 +74,7 @@ router.post('/register', async (req, res) => {
     );
 
     // Return success with complete user data
-    res.json({ 
+    res.json({
       message: 'User registered successfully',
       token,
       user: {
@@ -121,7 +122,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.json({ 
+    res.json({
       message: 'Login successful',
       token,
       user: {
@@ -133,6 +134,50 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Login failed', error: error.message });
+  }
+});
+
+/**
+ * POST /api/auth/change-password
+ * Change password for logged-in user
+ */
+router.post('/change-password', authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.userId;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Incorrect current password' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ message: 'Failed to change password', error: error.message });
   }
 });
 
@@ -346,7 +391,7 @@ router.post('/forgot-password', async (req, res) => {
     // Send email with reset link if Resend API key is configured
     if (resend) {
       const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-      
+
       try {
         const emailResponse = await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL || 'noreply@baggagelens.com',
@@ -388,13 +433,13 @@ router.post('/forgot-password', async (req, res) => {
             </html>
           `
         });
-        
+
         console.log('📧 Attempting to send email...');
         console.log(`   API Key configured: ${process.env.RESEND_API_KEY ? '✓' : '✗'}`);
         console.log(`   From: ${process.env.RESEND_FROM_EMAIL}`);
         console.log(`   To: ${email}`);
         console.log('📨 Resend Response:', JSON.stringify(emailResponse, null, 2));
-        
+
         if (emailResponse.id) {
           console.log(`✅ Email sent successfully! ID: ${emailResponse.id}`);
         } else if (emailResponse.error) {
@@ -511,7 +556,7 @@ router.post('/reset-password', async (req, res) => {
             </html>
           `
         });
-        
+
         console.log(`Password confirmation email sent to ${user.email}`);
       } catch (emailError) {
         console.error('Error sending confirmation email:', emailError);

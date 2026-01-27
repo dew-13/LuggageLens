@@ -214,7 +214,7 @@ function LandingPage() {
               Create Account
             </Button>
             <Button variant="outlined" onClick={() => navigate('/login')}>
-              Sign In
+              Log In
             </Button>
           </Box>
         </Container>

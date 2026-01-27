@@ -2,21 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import '../animations.css';
 
+import useLuggageStore from '../../store/luggageStore';
+
 export default function MyLuggageSummary() {
-  const cases = [
-    {
-      id: 1,
-      description: 'Black leather suitcase with gold handles',
-      date: '2026-01-12',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      description: 'Red duffel bag with brown straps',
-      date: '2026-01-11',
-      status: 'matched'
-    }
-  ];
+  const cases = useLuggageStore(state => state.cases.slice(0, 3));
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -44,8 +33,8 @@ export default function MyLuggageSummary() {
       </div>
       <div className="space-y-4">
         {cases.map((lugCase, index) => (
-          <div 
-            key={lugCase.id} 
+          <div
+            key={lugCase.id}
             className="card-animated border border-gray-200 rounded-lg p-4 hover:text-green-100 transition-colors"
             style={{ animationDelay: `${index * 80}ms` }}
           >

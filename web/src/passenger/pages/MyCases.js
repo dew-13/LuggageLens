@@ -5,36 +5,10 @@ import baggageClaimImage from '../../images/baggage claim.jpg';
 
 import '../animations.css';
 
+import useLuggageStore from '../../store/luggageStore';
+
 export default function MyCases() {
-  const [cases, setCases] = useState([]);
-
-  useEffect(() => {
-    fetchCases();
-  }, []);
-
-  const fetchCases = async () => {
-    try {
-      // TODO: Replace with actual API call
-      setCases([
-        {
-          id: 1,
-          description: 'Black leather suitcase with gold handles',
-          date: '2026-01-12',
-          status: 'pending',
-          image: ''
-        },
-        {
-          id: 2,
-          description: 'Red duffel bag with brown straps',
-          date: '2026-01-11',
-          status: 'matched',
-          image: ''
-        }
-      ]);
-    } catch (error) {
-      console.error('Error fetching cases:', error);
-    }
-  };
+  const cases = useLuggageStore(state => state.cases);
 
   return (
     <div
@@ -47,7 +21,7 @@ export default function MyCases() {
       }}
     >
       {/* Overlay for better text readability */}
-      <div 
+      <div
         style={{
           position: 'fixed',
           top: 0,
@@ -59,9 +33,9 @@ export default function MyCases() {
           pointerEvents: 'none'
         }}
       />
-      
+
       <PassengerNavigation />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Header */}
         <div className="mb-8 card-animated" style={{ animationDelay: '0.1s' }}>

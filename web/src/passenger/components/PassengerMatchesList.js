@@ -1,23 +1,18 @@
 import React, { useState } from 'react';
 import '../animations.css';
 
+import useLuggageStore from '../../store/luggageStore';
+
 export default function PassengerMatchesList({ matches }) {
-  const [confirmedMatches, setConfirmedMatches] = useState({});
+  const confirmMatch = useLuggageStore(state => state.confirmMatch);
+  const rejectMatch = useLuggageStore(state => state.rejectMatch);
 
   const handleConfirm = (matchId) => {
-    setConfirmedMatches(prev => ({
-      ...prev,
-      [matchId]: true
-    }));
-    // TODO: Send API request to confirm match
+    confirmMatch(matchId);
   };
 
   const handleReject = (matchId) => {
-    setConfirmedMatches(prev => ({
-      ...prev,
-      [matchId]: false
-    }));
-    // TODO: Send API request to reject match
+    rejectMatch(matchId);
   };
 
   return (
@@ -31,8 +26,8 @@ export default function PassengerMatchesList({ matches }) {
         </div>
       ) : (
         matches.map((match, index) => (
-          <div 
-            key={match.id} 
+          <div
+            key={match.id}
             className="card-animated bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
             style={{ animationDelay: `${index * 80}ms` }}
           >
@@ -55,13 +50,12 @@ export default function PassengerMatchesList({ matches }) {
             {/* Content */}
             <div className="p-4">
               <p className="text-sm text-gray-600 mb-3">{match.description}</p>
-              
+
               <div className="flex items-center justify-between mb-3">
-                <span className={`status-badge-animated px-2 py-1 rounded text-xs font-semibold inline-block ${
-                  match.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  match.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
+                <span className={`status-badge-animated px-2 py-1 rounded text-xs font-semibold inline-block ${match.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    match.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                      'bg-red-100 text-red-800'
+                  }`}>
                   {match.status.charAt(0).toUpperCase() + match.status.slice(1)}
                 </span>
                 <span className="match-similarity-score text-green-600 font-bold text-sm">{(match.similarity * 100).toFixed(0)}%</span>
@@ -82,13 +76,13 @@ export default function PassengerMatchesList({ matches }) {
 
               {/* Actions */}
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={() => handleConfirm(match.id)}
                   className="btn-animated flex-1 bg-blue-600 text-white py-2 px-3 rounded font-medium text-xs hover:bg-blue-700 transition-colors"
                 >
                   Confirm
                 </button>
-                <button 
+                <button
                   onClick={() => handleReject(match.id)}
                   className="btn-animated flex-1 bg-gray-200 text-gray-900 py-2 px-3 rounded font-medium text-xs hover:bg-gray-300 transition-colors"
                 >

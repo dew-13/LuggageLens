@@ -2,19 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import '../animations.css';
 
+import useLuggageStore from '../../store/luggageStore';
+
 export default function MatchesHighlights() {
-  const matches = [
-    {
-      id: 1,
-      similarity: 0.94,
-      status: 'pending'
-    },
-    {
-      id: 2,
-      similarity: 0.87,
-      status: 'confirmed'
-    }
-  ];
+  const matches = useLuggageStore(state => state.matches.slice(0, 3));
 
   return (
     <div className="card-animated bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -26,15 +17,14 @@ export default function MatchesHighlights() {
       </div>
       <div className="space-y-3">
         {matches.map((match, index) => (
-          <div 
-            key={match.id} 
+          <div
+            key={match.id}
             className="card-animated border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors"
             style={{ animationDelay: `${index * 80}ms` }}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className={`status-badge-animated px-2 py-1 rounded text-xs font-semibold inline-block ${
-                match.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
-              }`}>
+              <span className={`status-badge-animated px-2 py-1 rounded text-xs font-semibold inline-block ${match.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                }`}>
                 {match.status.charAt(0).toUpperCase() + match.status.slice(1)}
               </span>
               <span className=" font-bold text-sm" style={{ color: '#133458' }}>{(match.similarity * 100).toFixed(0)}%</span>

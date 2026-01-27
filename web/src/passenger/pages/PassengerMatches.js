@@ -4,40 +4,10 @@ import PassengerMatchesList from '../components/PassengerMatchesList';
 import baggageClaimImage from '../../images/baggage claim.jpg';
 import '../animations.css';
 
+import useLuggageStore from '../../store/luggageStore';
+
 export default function PassengerMatches() {
-  const [matches, setMatches] = useState([]);
-
-  useEffect(() => {
-    fetchMatches();
-  }, []);
-
-  const fetchMatches = async () => {
-    try {
-      // TODO: Replace with actual API call
-      setMatches([
-        {
-          id: 1,
-          lostImage: '',
-          foundImage: '',
-          similarity: 0.94,
-          status: 'pending',
-          date: '2026-01-12',
-          description: 'Black leather suitcase match'
-        },
-        {
-          id: 2,
-          lostImage: '',
-          foundImage: '',
-          similarity: 0.87,
-          status: 'confirmed',
-          date: '2026-01-11',
-          description: 'Red backpack match'
-        }
-      ]);
-    } catch (error) {
-      console.error('Error fetching matches:', error);
-    }
-  };
+  const matches = useLuggageStore(state => state.matches);
 
   return (
     <div
@@ -50,7 +20,7 @@ export default function PassengerMatches() {
       }}
     >
       {/* Overlay for better text readability */}
-      <div 
+      <div
         style={{
           position: 'fixed',
           top: 0,
@@ -62,9 +32,9 @@ export default function PassengerMatches() {
           pointerEvents: 'none'
         }}
       />
-      
+
       <PassengerNavigation />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Header */}
         <div className="mb-8 card-animated" style={{ animationDelay: '0.1s' }}>

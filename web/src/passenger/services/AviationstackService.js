@@ -6,7 +6,7 @@
  */
 
 const AVIATIONSTACK_API_KEY = 'b819f80ba59d5471b397c6f9a35d2d85';
-const AVIATIONSTACK_BASE_URL = 'https://api.aviationstack.com/v1';
+const AVIATIONSTACK_BASE_URL = 'http://api.aviationstack.com/v1';
 
 /**
  * Format flight number to standard format (e.g., AA100)
@@ -43,7 +43,7 @@ export const validateFlightWithAviationstack = async (
   try {
     console.log('\n🔵 [AVIATIONSTACK] Starting flight verification...');
     console.log(`   Flight: ${flightNumber} | Date: ${dateOfTravel} | Route: ${originAirport} → ${destinationAirport}`);
-    
+
     const { airline_iata, flight_number } = formatFlightNumber(flightNumber);
     const flightDate = formatDate(dateOfTravel);
 
@@ -95,8 +95,8 @@ export const validateFlightWithAviationstack = async (
       const departure = flight.departure?.airport;
       const arrival = flight.arrival?.airport;
       return (
-        departure && 
-        arrival && 
+        departure &&
+        arrival &&
         (departure === originAirport || departure?.toUpperCase() === originAirport?.toUpperCase()) &&
         (arrival === destinationAirport || arrival?.toUpperCase() === destinationAirport?.toUpperCase())
       );
@@ -297,12 +297,18 @@ export const fetchFlightRoute = async (airlineCode, flightNumber, dateOfTravel) 
     // Try backend first (with better error handling)
     try {
       const { default: apiClient } = await import('../../services/apiClient');
-      
+
       // Combine airline code and flight number (e.g., "QR" + "110" = "QR110")
-      const fullFlightNumber = `${airlineCode}${flightNumber}`;
-      
+      // Careful not to duplicate the airline code if already present in flightNumber (e.g. UL + UL605)
+      let fullFlightNumber = flightNumber.trim().toUpperCase();
+      const cleanAirline = airlineCode.trim().toUpperCase();
+
+      if (!fullFlightNumber.startsWith(cleanAirline)) {
+        fullFlightNumber = `${cleanAirline}${fullFlightNumber}`;
+      }
+
       const params = new URLSearchParams({
-        flight: fullFlightNumber,  // Send as combined: "QR110"
+        flight: fullFlightNumber,
         date: dateOfTravel,
       });
 
@@ -313,6 +319,8 @@ export const fetchFlightRoute = async (airlineCode, flightNumber, dateOfTravel) 
         const result = {
           originAirport: data.data.originAirport,
           destinationAirport: data.data.destinationAirport,
+          originIata: data.data.originIata,
+          destinationIata: data.data.destinationIata,
           airline: data.data.airline,
           aircraft: data.data.aircraft,
           departure: data.data.departure,
@@ -347,7 +355,7 @@ export const fetchFlightRoute = async (airlineCode, flightNumber, dateOfTravel) 
     if (error.response?.status === 404) {
       console.warn('   ℹ️  Backend endpoint not found - using simulated data');
     }
-    
+
     // Final fallback to simulated data
     const fallbackResult = getSimulatedFlightData(airlineCode, flightNumber, dateOfTravel);
     return fallbackResult || null;
@@ -360,7 +368,7 @@ export const fetchFlightRoute = async (airlineCode, flightNumber, dateOfTravel) 
  */
 const getSimulatedFlightData = (airlineCode, flightNumber, dateOfTravel) => {
   const fullFlightNumber = `${airlineCode}${flightNumber}`;
-  
+
   // Extensive database of common flights
   const flightDatabase = {
     // Middle East / Indian subcontinent
@@ -371,25 +379,25 @@ const getSimulatedFlightData = (airlineCode, flightNumber, dateOfTravel) => {
     'EK500': { origin: 'DXB', destination: 'BOM', airline: 'Emirates', aircraft: 'B777' },
     'EK501': { origin: 'BOM', destination: 'DXB', airline: 'Emirates', aircraft: 'B777' },
     'EY100': { origin: 'AUH', destination: 'DEL', airline: 'Etihad Airways', aircraft: 'B787' },
-    
+
     // US Routes
     'AA100': { origin: 'JFK', destination: 'LAX', airline: 'American Airlines', aircraft: 'B777' },
     'AA101': { origin: 'LAX', destination: 'JFK', airline: 'American Airlines', aircraft: 'B777' },
     'AA456': { origin: 'LAX', destination: 'ORD', airline: 'American Airlines', aircraft: 'B767' },
     'AA789': { origin: 'SFO', destination: 'JFK', airline: 'American Airlines', aircraft: 'B787' },
     'DL123': { origin: 'ATL', destination: 'LAX', airline: 'Delta Airlines', aircraft: 'B777' },
-    
+
     // Europe
     'BA456': { origin: 'LHR', destination: 'JFK', airline: 'British Airways', aircraft: 'B777' },
     'BA205': { origin: 'LHR', destination: 'CDG', airline: 'British Airways', aircraft: 'A320' },
     'AF555': { origin: 'CDG', destination: 'JFK', airline: 'Air France', aircraft: 'B777' },
     'LH501': { origin: 'FRA', destination: 'JFK', airline: 'Lufthansa', aircraft: 'B777' },
-    
+
     // Asia Pacific
     'SQ006': { origin: 'SIN', destination: 'JFK', airline: 'Singapore Airlines', aircraft: 'B777' },
     'ANA212': { origin: 'HND', destination: 'LAX', airline: 'All Nippon Airways', aircraft: 'B787' },
     'CI005': { origin: 'TPE', destination: 'LAX', airline: 'China Airlines', aircraft: 'B777' },
-    
+
     // India Domestic & Regional
     '6E100': { origin: 'DEL', destination: 'BOM', airline: 'IndiGo', aircraft: 'A320' },
     '6E456': { origin: 'BLR', destination: 'DEL', airline: 'IndiGo', aircraft: 'A320' },
@@ -399,11 +407,13 @@ const getSimulatedFlightData = (airlineCode, flightNumber, dateOfTravel) => {
   };
 
   const flightData = flightDatabase[fullFlightNumber];
-  
+
   if (flightData) {
     return {
       originAirport: flightData.origin,
       destinationAirport: flightData.destination,
+      originIata: flightData.origin,
+      destinationIata: flightData.destination,
       airline: flightData.airline,
       aircraft: flightData.aircraft,
       departure: `${dateOfTravel}T10:00:00Z`,
