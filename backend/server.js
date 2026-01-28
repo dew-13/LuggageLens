@@ -20,6 +20,8 @@ const corsOptions = {
     /^https?:\/\/.+\.gitpod\.io$/,  // Gitpod
     /^https?:\/\/.+\.ngrok\.io$/,   // ngrok tunneling
     /^https?:\/\/.+\.asse\.devtunnels\.ms$/, // VS Code Dev Tunnels
+    /^https:\/\/.+\.vercel\.app$/,  // Vercel deployments
+    /^https:\/\/.+\.onrender\.com$/, // Render deployments
     process.env.CORS_ORIGIN       // From environment variable
   ].filter(Boolean),
   credentials: true,
