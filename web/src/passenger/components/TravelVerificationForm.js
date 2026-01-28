@@ -36,10 +36,8 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingRoute, setIsFetchingRoute] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState(null);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [routeInfo, setRouteInfo] = useState(null);
 
   // Validation functions
   const validateName = (name) => {
@@ -133,18 +131,15 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
           originAirport: flightRoute.originIata || flightRoute.originAirport,
           destinationAirport: flightRoute.destinationIata || flightRoute.destinationAirport
         }));
-        setRouteInfo(flightRoute);
         setError(null);
         // Success message removed as per user request
         setSuccessMessage(null);
       } else {
         console.log('⚠️ [AUTO-FILL] No route data received');
-        setRouteInfo(null);
         setError('❌ Could not find flight information. Please enter airports manually or try a different flight.');
       }
     } catch (err) {
       console.error('❌ [AUTO-FILL] Error fetching flight route:', err);
-      setRouteInfo(null);
       setError(`❌ Error fetching flight details: ${err.message}. Please try again or enter airports manually.`);
     } finally {
       setIsFetchingRoute(false);
@@ -247,8 +242,6 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
         ticketNumber: formData.ticketNumber.trim(),
         passportNumber: formData.passportNumber.trim(),
       });
-
-      setVerificationStatus(result.status);
 
       if (result.status === 'travel-verified' || result.status === 'travel-likely') {
         setSuccessMessage('✅ Travel verified successfully! Proceeding to luggage details...');

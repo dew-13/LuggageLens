@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import PassengerNavigation from '../components/PassengerNavigation';
 import TravelVerificationForm from '../components/TravelVerificationForm';
 import ReportForm from '../components/ReportForm';
-import baggageClaimImage from '../../images/baggage claim.jpg';
 import '../animations.css';
 
 import useLuggageStore from '../../store/luggageStore';

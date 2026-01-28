@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import PassengerNavigation from '../components/PassengerNavigation';
 import PassengerMatchesList from '../components/PassengerMatchesList';
 import baggageClaimImage from '../../images/baggage claim.jpg';

@@ -6,7 +6,6 @@
  */
 
 const AMADEUS_API_KEY = 'xiJ6TMXqHrnsn0y1s2l8EF2NUGczwGX8';
-const AMADEUS_BASE_URL = 'https://test.api.amadeus.com';
 
 /**
  * Search flights with Amadeus API
@@ -21,7 +20,7 @@ export const searchFlightWithAmadeus = async (
   try {
     console.log('\n🟢 [AMADEUS] Starting flight search...');
     console.log(`   Flight: ${flightNumber} | Date: ${dateOfTravel} | Route: ${originAirport} → ${destinationAirport}`);
-    
+
     const flightDate = dateOfTravel.split('T')[0]; // Ensure YYYY-MM-DD format
 
     // Step 1: Get access token from Amadeus
@@ -103,9 +102,9 @@ export const searchFlightWithAmadeus = async (
     const matchedFlight = flightData.data.find(flight => {
       if (flight.itineraries && flight.itineraries.length > 0) {
         const segment = flight.itineraries[0].segments[0];
-        return segment.operating?.carrierCode && 
-               segment.number &&
-               `${segment.operating.carrierCode}${segment.number}`.toUpperCase() === flightNumber.toUpperCase();
+        return segment.operating?.carrierCode &&
+          segment.number &&
+          `${segment.operating.carrierCode}${segment.number}`.toUpperCase() === flightNumber.toUpperCase();
       }
       return false;
     }) || flightData.data[0]; // Use first result if exact match not found
@@ -236,14 +235,6 @@ export const getFlightOffers = async (
   adults = 1
 ) => {
   try {
-    const params = new URLSearchParams({
-      originLocationCode: originAirport,
-      destinationLocationCode: destinationAirport,
-      departureDate: departureDate,
-      adults: adults,
-      max: 5,
-    });
-
     // In production: /shopping/flight-offers endpoint
     console.log('Amadeus flight offers (should be proxied through backend)');
 
