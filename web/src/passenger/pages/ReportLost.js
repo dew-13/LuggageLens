@@ -62,52 +62,52 @@ export default function ReportLost() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Progress Stepper */}
         <div className="mb-12">
-          <div className="flex items-center justify-between w-full relative">
+          <div className="flex items-start justify-between w-full relative">
             {/* Step 1: Verify Travel */}
-            <div className={`flex flex-col items-center relative z-10 ${step === 'verification' || step === 'report' || submitted ? 'opacity-100' : 'opacity-50'}`}>
+            <div className={`flex flex-col items-center relative z-10 flex-1 ${step === 'verification' || step === 'report' || submitted ? 'opacity-100' : 'opacity-50'}`}>
               <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 transition-all duration-300 ${step === 'verification' || step === 'report' || submitted ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'bg-white/5 text-gray-500'
                 }`}>
                 {step === 'report' || submitted ? '✓' : '1'}
               </div>
-              <span className={`text-[10px] sm:text-xs font-medium mt-3 text-center transition-colors duration-300 ${step === 'verification' || step === 'report' || submitted ? 'text-white' : 'text-gray-500'
-                }`}>VERIFY TRAVEL</span>
+              <span className={`text-[10px] sm:text-xs font-medium mt-2 text-center transition-colors duration-300 leading-tight ${step === 'verification' || step === 'report' || submitted ? 'text-white' : 'text-gray-500'
+                }`}>VERIFY<br className="sm:hidden" /> TRAVEL</span>
             </div>
 
             {/* Line 1-2 */}
-            <div className={`flex-1 h-[1px] mx-2 sm:mx-4 transition-all duration-500 ${step === 'report' || submitted ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/10'}`} />
+            <div className={`flex-1 h-[1px] mt-4 sm:mt-5 transition-all duration-500 ${step === 'report' || submitted ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/10'}`} />
 
             {/* Step 2: Luggage Details */}
-            <div className={`flex flex-col items-center relative z-10 ${step === 'report' || submitted ? 'opacity-100' : 'opacity-50'}`}>
+            <div className={`flex flex-col items-center relative z-10 flex-1 ${step === 'report' || submitted ? 'opacity-100' : 'opacity-50'}`}>
               <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 transition-all duration-300 ${step === 'report' || submitted ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'bg-white/5 text-gray-500'
                 }`}>
                 {submitted ? '✓' : '2'}
               </div>
-              <span className={`text-[10px] sm:text-xs font-medium mt-3 text-center transition-colors duration-300 ${step === 'report' || submitted ? 'text-white' : 'text-gray-500'
-                }`}>LUGGAGE DETAILS</span>
+              <span className={`text-[10px] sm:text-xs font-medium mt-2 text-center transition-colors duration-300 leading-tight ${step === 'report' || submitted ? 'text-white' : 'text-gray-500'
+                }`}>LUGGAGE<br className="sm:hidden" /> DETAILS</span>
             </div>
 
             {/* Line 2-3 */}
-            <div className={`flex-1 h-[1px] mx-2 sm:mx-4 transition-all duration-500 ${submitted ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/10'}`} />
+            <div className={`flex-1 h-[1px] mt-4 sm:mt-5 transition-all duration-500 ${submitted ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/10'}`} />
 
             {/* Step 3: Search & Match */}
-            <div className={`flex flex-col items-center relative z-10 ${submitted ? 'opacity-100' : 'opacity-50'}`}>
+            <div className={`flex flex-col items-center relative z-10 flex-1 ${submitted ? 'opacity-100' : 'opacity-50'}`}>
               <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 transition-all duration-300 ${submitted ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'bg-white/5 text-gray-500'
                 }`}>
                 3
               </div>
-              <span className={`text-[10px] sm:text-xs font-medium mt-3 text-center transition-colors duration-300 ${submitted ? 'text-white' : 'text-gray-500'
-                }`}>SEARCH & MATCH</span>
+              <span className={`text-[10px] sm:text-xs font-medium mt-2 text-center transition-colors duration-300 leading-tight ${submitted ? 'text-white' : 'text-gray-500'
+                }`}>SEARCH &<br className="sm:hidden" /> MATCH</span>
             </div>
 
             {/* Line 3-4 */}
-            <div className="flex-1 h-[1px] mx-2 sm:mx-4 bg-white/10" />
+            <div className="flex-1 h-[1px] mt-4 sm:mt-5 bg-white/10" />
 
             {/* Step 4: Retrieve */}
-            <div className="flex flex-col items-center relative z-10 opacity-50">
+            <div className="flex flex-col items-center relative z-10 flex-1 opacity-50">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 bg-white/5 text-gray-500">
                 4
               </div>
-              <span className="text-[10px] sm:text-xs font-medium mt-3 text-center text-gray-500">RETRIEVE</span>
+              <span className="text-[10px] sm:text-xs font-medium mt-2 text-center text-gray-500 leading-tight">RETRIEVE</span>
             </div>
           </div>
         </div>

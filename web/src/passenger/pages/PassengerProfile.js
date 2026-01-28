@@ -4,8 +4,6 @@ import useAuthStore from '../../store/authStore';
 import apiClient from '../../services/apiClient';
 import '../animations.css';
 
-import baggageClaimImage from '../../images/baggage claim.jpg';
-
 export default function PassengerProfile() {
     const { user } = useAuthStore();
     const [formData, setFormData] = useState({
@@ -66,33 +64,11 @@ export default function PassengerProfile() {
     };
 
     return (
-        <div
-            className="min-h-screen pt-16 relative"
-            style={{
-                backgroundImage: `url('${baggageClaimImage}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundAttachment: 'fixed'
-            }}
-        >
-            {/* Overlay for better text readability */}
-            <div
-                style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(16, 46, 74, 0.9)',
-                    zIndex: 0,
-                    pointerEvents: 'none'
-                }}
-            />
-
+        <div className="min-h-screen relative pt-16 md:pt-20 md:pl-20">
             <PassengerNavigation />
 
-            <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-                <h1 className="text-2xl font-bold text-white mb-6">My Profile</h1>
+            <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 relative z-10">
+                <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-6">My Profile</h1>
 
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6 card-animated">
                     <div className="p-6 border-b border-gray-200">

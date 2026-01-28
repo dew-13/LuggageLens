@@ -39,7 +39,7 @@ export default function PassengerDashboard() {
 
 
       {/* Hero Section */}
-      <div className="relative z-10 py-4 lg:py-20">
+      <div className="relative z-10 py-0 md:py-4 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center min-h-[400px] lg:min-h-0">
 
@@ -50,27 +50,27 @@ export default function PassengerDashboard() {
             </div>
 
             {/* Content - Overlay on Mobile, Left Side on Desktop */}
-            <div className="relative z-10 text-left space-y-6 pt-24 lg:pt-0 lg:order-1 pointer-events-none lg:pointer-events-auto">
-              <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-medium text-gray-300 backdrop-blur-md mb-2 pointer-events-auto">
+            <div className="relative z-10 text-left space-y-6 pt-8 md:pt-20 lg:pt-0 lg:order-1 pointer-events-none lg:pointer-events-auto">
+              <div className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-white/10 bg-white/5 text-[10px] md:text-xs font-medium text-gray-300 backdrop-blur-md mb-2 pointer-events-auto">
                 ✨ Next Generation Tracking
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white tracking-tight leading-tight">
                 Global <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-500">Luggage Recovery</span>
               </h1>
-              <p className="text-base lg:text-lg text-gray-400 max-w-xl leading-relaxed">
+              <p className="text-sm sm:text-base lg:text-lg text-gray-400 max-w-xl leading-relaxed">
                 Advanced AI algorithms that scan, match, and locate your missing items across thousands of airports worldwide.
               </p>
-              <div className="pt-2 flex flex-wrap gap-4 pointer-events-auto">
+              <div className="pt-2 pb-8 md:pb-12 flex flex-nowrap gap-2 md:gap-4 pointer-events-auto">
                 <Link
                   to="/passenger/report"
-                  className="px-8 py-4 bg-white text-black rounded-full font-bold text-sm tracking-wide hover:bg-gray-200 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center gap-2"
+                  className="flex-1 px-3 py-3 md:px-8 md:py-4 bg-white text-black rounded-full font-bold text-[10px] md:text-sm tracking-wide hover:bg-gray-200 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center gap-1 md:gap-2 whitespace-nowrap"
                 >
-                  Start Recovery <span className="text-lg">→</span>
+                  Start Recovery <span className="text-sm md:text-lg">→</span>
                 </Link>
                 <Link
                   to="/passenger/cases"
-                  className="px-8 py-4 border border-white/20 text-white rounded-full font-bold text-sm tracking-wide hover:bg-white/10 transition-all"
+                  className="flex-1 px-3 py-3 md:px-8 md:py-4 border border-white/20 text-white rounded-full font-bold text-[10px] md:text-sm tracking-wide hover:bg-white/10 transition-all flex items-center justify-center whitespace-nowrap"
                 >
                   Track Status
                 </Link>

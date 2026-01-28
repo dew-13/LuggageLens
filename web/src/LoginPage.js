@@ -283,8 +283,13 @@ export default function LoginPage() {
         </div>
 
         {/* Sign Up Form */}
-        <div className="absolute top-0 h-full transition-all duration-700 w-full md:w-1/2 left-0 opacity-0 z-10 form-container-signup"
-          style={isSignUp ? { transform: 'translateX(100%)', opacity: 1, zIndex: 5, pointerEvents: 'auto' } : { transform: 'translateX(0%)', opacity: 0, zIndex: 1, pointerEvents: 'none' }}>
+        <div
+          className={`absolute h-full transition-all duration-700 w-full md:w-1/2 left-0 form-container-signup
+            ${isSignUp
+              ? 'top-16 md:top-0 opacity-100 z-20 md:translate-x-full pointer-events-auto'
+              : 'top-0 opacity-0 z-10 translate-x-0 pointer-events-none'
+            }`}
+        >
           <form onSubmit={handleSignup} className="h-full flex flex-col justify-center items-center px-8 md:px-12 py-8 bg-transparent text-center">
             <h1 className="font-bold text-3xl mb-6 text-white tracking-tight">Create Account</h1>
 
@@ -381,8 +386,13 @@ export default function LoginPage() {
         </div>
 
         {/* Sign In Form */}
-        <div className="absolute top-0 h-full transition-all duration-700 w-full md:w-1/2 left-0 z-20 form-container-signin"
-          style={isSignUp ? { transform: 'translateX(100%)', opacity: 0, zIndex: 1, pointerEvents: 'none' } : { transform: 'translateX(0%)', opacity: 1, zIndex: 5, pointerEvents: 'auto' }}>
+        <div
+          className={`absolute h-full transition-all duration-700 w-full md:w-1/2 left-0 form-container-signin
+            ${isSignUp
+              ? 'top-0 opacity-0 z-10 md:translate-x-full pointer-events-none'
+              : 'top-16 md:top-0 opacity-100 z-20 translate-x-0 pointer-events-auto'
+            }`}
+        >
           <form onSubmit={handleLogin} className="h-full flex flex-col justify-center items-center px-8 md:px-12 py-8 bg-transparent text-center">
             <h1 className="font-bold text-3xl mb-8 text-white tracking-tight">Welcome Back</h1>
 
