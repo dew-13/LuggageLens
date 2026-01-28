@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import loginBg from './images/loginbg.jpg';
+
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -61,7 +61,7 @@ export default function ResetPasswordPage() {
 
       setIsSuccess(true);
       setMessage(data.message);
-      
+
       // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate('/login');
@@ -74,82 +74,71 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen md:h-screen flex items-center justify-center px-2 sm:px-4 py-4 md:py-0" style={{
-      backgroundImage: `url(${loginBg})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
-      margin: 0,
-      padding: 0
-    }}>
-      <div className="rounded-lg md:rounded-xl overflow-hidden border relative w-full md:w-[400px]" style={{
-        background: 'rgba(19, 52, 88, 0.5)',
-        backdropFilter: 'blur(15px)',
-        border: '1.5px solid rgba(255, 255, 255, 0.3)',
-        boxShadow: `
-          0 0 40px rgba(0, 0, 0, 0.5),
-          0 20px 60px rgba(0, 0, 0, 0.4),
-          inset 0 1px 20px rgba(255, 255, 255, 0.15),
-          inset 0 -2px 15px rgba(0, 0, 0, 0.2),
-          0 0 30px rgba(19, 52, 88, 0.6)
-        `,
-        perspective: '1000px',
-        transformStyle: 'preserve-3d'
-      }}>
-        <div className="px-4 sm:px-8 py-8 sm:py-10">
-          <h1 className="font-bold text-lg sm:text-2xl mb-2 text-center text-white">Reset Password</h1>
-          <p className="text-xs sm:text-sm text-gray-200 text-center mb-6">Enter your new password below</p>
+
+    <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
+      <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl w-full max-w-[450px] relative overflow-hidden card-animated">
+        <div className="px-8 py-10">
+          <h1 className="font-bold text-3xl mb-2 text-center text-white tracking-tight">Reset Password</h1>
+          <p className="text-sm text-gray-400 text-center mb-8">Enter your new password below</p>
 
           {isSuccess ? (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-              <p className="font-semibold mb-2">✓ Success!</p>
-              <p className="text-sm">{message}</p>
-              <p className="text-xs mt-2">Redirecting to login...</p>
+            <div className="bg-green-500/10 border border-green-500/20 text-green-200 px-4 py-3 rounded-lg mb-6">
+              <p className="font-semibold mb-2 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                Success!
+              </p>
+              <p className="text-sm opacity-90">{message}</p>
+              <p className="text-xs mt-2 opacity-75">Redirecting to login...</p>
             </div>
           ) : (
             <>
               {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <div className="bg-red-500/10 border border-red-500/20 text-red-200 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   <p className="text-sm">{error}</p>
                 </div>
               )}
 
               {message && (
-                <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
+                <div className="bg-blue-500/10 border border-blue-500/20 text-blue-200 px-4 py-3 rounded-lg mb-6">
                   <p className="text-sm">{message}</p>
                 </div>
               )}
 
-              <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-gray-200 block mb-2">New Password</label>
-                  <input
-                    type="password"
-                    placeholder="Enter new password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-2 sm:py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm text-black placeholder-gray-400"
-                    minLength="6"
-                  />
-                  <p className="text-xs text-gray-300 mt-1">Minimum 6 characters</p>
+              <form onSubmit={handleResetPassword} className="flex flex-col gap-5">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-300 ml-1">New Password</label>
+                  <div className="relative group">
+                    <input
+                      type="password"
+                      placeholder="Enter new password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:bg-black/40 focus:border-white/50 focus:outline-none text-sm text-white placeholder-gray-500 transition-all"
+                      minLength="6"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 ml-1">Minimum 6 characters</p>
                 </div>
 
-                <div>
-                  <label className="text-xs font-semibold text-gray-200 block mb-2">Confirm Password</label>
-                  <input
-                    type="password"
-                    placeholder="Confirm new password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-2 sm:py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm text-black placeholder-gray-400"
-                    minLength="6"
-                  />
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-300 ml-1">Confirm Password</label>
+                  <div className="relative group">
+                    <input
+                      type="password"
+                      placeholder="Confirm new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:bg-black/40 focus:border-white/50 focus:outline-none text-sm text-white placeholder-gray-500 transition-all"
+                      minLength="6"
+                    />
+                  </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading || !token}
-                  className="w-full bg-blue-600 text-white rounded-lg py-2.5 sm:py-3 font-semibold text-sm hover:bg-blue-700 disabled:bg-gray-400 transition-colors cursor-pointer"
+                  className="w-full bg-white text-black rounded-lg py-3.5 font-bold text-sm hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 shadow-lg shadow-white/10 mt-2"
                 >
                   {isLoading ? 'Resetting...' : 'Reset Password'}
                 </button>
@@ -157,7 +146,7 @@ export default function ResetPasswordPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
-                  className="w-full bg-transparent text-blue-400 border-2 border-blue-400 rounded-lg py-2.5 sm:py-3 font-semibold text-sm hover:bg-blue-400 hover:text-white transition-colors cursor-pointer"
+                  className="w-full bg-transparent text-gray-400 border border-white/10 rounded-lg py-3.5 font-semibold text-sm hover:bg-white/5 hover:text-white transition-all transform active:scale-95"
                 >
                   Back to Login
                 </button>

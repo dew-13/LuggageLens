@@ -1,143 +1,16 @@
 import React, { useState } from 'react';
 import { verifyTravelDetails } from '../services/TravelVerificationService';
 import { fetchFlightRoute } from '../services/AviationstackService';
+import { AIRPORTS as ALL_AIRPORTS } from '../data/airports';
+import { AIRLINES as ALL_AIRLINES } from '../data/airlines';
 import '../animations.css';
 
-/**
- * Airport data with code and name - sorted alphabetically by name
- */
-const AIRPORTS = [
-  { code: 'AMD', name: 'Sardar Vallabhbhai Patel International Airport (Ahmedabad)' },
-  { code: 'AMS', name: 'Amsterdam Airport Schiphol' },
-  { code: 'AUH', name: 'Abu Dhabi International Airport' },
-  { code: 'BLR', name: 'Kempegowda International Airport (Bangalore)' },
-  { code: 'BCN', name: 'Barcelona-El Prat Airport' },
-  { code: 'BOS', name: 'Boston Logan International Airport' },
-  { code: 'BKK', name: 'Suvarnabhumi Airport (Bangkok)' },
-  { code: 'CCU', name: 'Netaji Subhas Chandra Bose International Airport (Kolkata)' },
-  { code: 'CDG', name: 'Paris Charles de Gaulle Airport' },
-  { code: 'CGP', name: 'Chittagong International Airport' },
-  { code: 'CMB', name: 'Bandaranaike International Airport (Colombo)' },
-  { code: 'COK', name: 'Cochin International Airport' },
-  { code: 'DAC', name: 'Hazrat Shahjalal International Airport (Dhaka)' },
-  { code: 'DEL', name: 'Indira Gandhi International Airport (Delhi)' },
-  { code: 'DEN', name: 'Denver International Airport' },
-  { code: 'DFW', name: 'Dallas/Fort Worth International Airport' },
-  { code: 'DOH', name: 'Hamad International Airport (Doha)' },
-  { code: 'DXB', name: 'Dubai International Airport' },
-  { code: 'DWC', name: 'Al Maktoum International Airport (Dubai)' },
-  { code: 'FRA', name: 'Frankfurt Airport' },
-  { code: 'HND', name: 'Tokyo Haneda Airport' },
-  { code: 'HKG', name: 'Hong Kong International Airport' },
-  { code: 'HYD', name: 'Rajiv Gandhi International Airport (Hyderabad)' },
-  { code: 'ISB', name: 'Benazir Bhutto International Airport (Islamabad)' },
-  { code: 'IST', name: 'Istanbul Airport' },
-  { code: 'JAI', name: 'Jaipur International Airport' },
-  { code: 'JAT', name: 'Jaffna International Airport' },
-  { code: 'JFK', name: 'John F. Kennedy International Airport (New York)' },
-  { code: 'KHI', name: 'Jinnah International Airport (Karachi)' },
-  { code: 'KIX', name: 'Kobe Airport' },
-  { code: 'KTM', name: 'Tribhuvan International Airport (Kathmandu)' },
-  { code: 'KUL', name: 'Kuala Lumpur International Airport' },
-  { code: 'LAX', name: 'Los Angeles International Airport' },
-  { code: 'LHE', name: 'Allama Iqbal International Airport (Lahore)' },
-  { code: 'LHR', name: 'London Heathrow Airport' },
-  { code: 'LGW', name: 'London Gatwick Airport' },
-  { code: 'LKO', name: 'Amausi Airport (Lucknow)' },
-  { code: 'MAA', name: 'Chennai International Airport' },
-  { code: 'MAD', name: 'Adolfo Suárez Madrid-Barajas Airport' },
-  { code: 'MEL', name: 'Melbourne Airport' },
-  { code: 'MIA', name: 'Miami International Airport' },
-  { code: 'MLE', name: 'Velana International Airport (Malé)' },
-  { code: 'MNL', name: 'Ninoy Aquino International Airport (Manila)' },
-  { code: 'MUC', name: 'Munich Airport' },
-  { code: 'MUM', name: 'Bombay High International Airport (Mumbai)' },
-  { code: 'MUX', name: 'Multan International Airport' },
-  { code: 'NRT', name: 'Narita International Airport (Tokyo)' },
-  { code: 'ORD', name: 'Chicago O\'Hare International Airport' },
-  { code: 'PBH', name: 'Paro International Airport' },
-  { code: 'PEK', name: 'Beijing Capital International Airport' },
-  { code: 'PEW', name: 'Peshawar International Airport' },
-  { code: 'PKR', name: 'Pokhara International Airport' },
-  { code: 'PNQ', name: 'Pune Airport' },
-  { code: 'PRG', name: 'Václav Havel Airport Prague' },
-  { code: 'PVG', name: 'Shanghai Pudong International Airport' },
-  { code: 'SEA', name: 'Seattle-Tacoma International Airport' },
-  { code: 'SFO', name: 'San Francisco International Airport' },
-  { code: 'SIN', name: 'Singapore Changi Airport' },
-  { code: 'SYD', name: 'Sydney Airport' },
-  { code: 'SYL', name: 'Sylhet International Airport' },
-  { code: 'VIE', name: 'Vienna International Airport' },
-  { code: 'VTZ', name: 'Visakhapatnam Airport' },
-  { code: 'WAW', name: 'Warsaw Chopin Airport' },
-  { code: 'ZRH', name: 'Zurich Airport' },
-];
+// Deduplicate data to prevent unique key errors in React
+const AIRPORTS = [...new Map(ALL_AIRPORTS.map(item => [item.code, item])).values()]
+  .sort((a, b) => a.name.localeCompare(b.name));
 
-/**
- * Airlines data with code and name - sorted alphabetically by name
- */
-const AIRLINES = [
-  { code: '6E', name: 'IndiGo' },
-  { code: 'AA', name: 'American Airlines' },
-  { code: 'AC', name: 'Air Canada' },
-  { code: 'AF', name: 'Air France' },
-  { code: 'AI', name: 'Air India' },
-  { code: 'AK', name: 'AirAsia' },
-  { code: 'ANA', name: 'All Nippon Airways (ANA)' },
-  { code: 'B6', name: 'JetBlue Airways' },
-  { code: 'BA', name: 'British Airways' },
-  { code: 'BG', name: 'Biman Bangladesh Airlines' },
-  { code: 'BR', name: 'EVA Air' },
-  { code: 'BS', name: 'Air Astana' },
-  { code: 'BX', name: 'Air Busan' },
-  { code: 'CA', name: 'Air China' },
-  { code: 'CI', name: 'China Airlines' },
-  { code: 'CX', name: 'Cathay Pacific' },
-  { code: 'DL', name: 'Delta Air Lines' },
-  { code: 'EK', name: 'Emirates' },
-  { code: 'EY', name: 'Etihad Airways' },
-  { code: 'EZY', name: 'easyJet' },
-  { code: 'F9', name: 'Frontier Airlines' },
-  { code: 'FB', name: 'FitsAir' },
-  { code: 'FD', name: 'Flydubai' },
-  { code: 'FR', name: 'Ryanair' },
-  { code: 'G4', name: 'Allegiant Air' },
-  { code: 'G8', name: 'GoAir' },
-  { code: 'GF', name: 'Gulf Air' },
-  { code: 'HU', name: 'Hainan Airlines' },
-  { code: 'IB', name: 'Iberia' },
-  { code: 'JAL', name: 'Japan Airlines' },
-  { code: 'JU', name: 'Air Astana' },
-  { code: 'KE', name: 'Korean Air' },
-  { code: 'KL', name: 'KLM Royal Dutch Airlines' },
-  { code: 'LH', name: 'Lufthansa' },
-  { code: 'LX', name: 'SWISS International Air Lines' },
-  { code: 'MH', name: 'Malaysia Airlines' },
-  { code: 'MS', name: 'EgyptAir' },
-  { code: 'MU', name: 'China Eastern Airlines' },
-  { code: 'NH', name: 'All Nippon Airways' },
-  { code: 'NK', name: 'Spirit Airlines' },
-  { code: 'NW', name: 'Serene Air' },
-  { code: 'OZ', name: 'Asiana Airlines' },
-  { code: 'PK', name: 'Pakistan International Airlines (PIA)' },
-  { code: 'PR', name: 'Philippine Airlines' },
-  { code: 'QF', name: 'Qantas' },
-  { code: 'QR', name: 'Qatar Airways' },
-  { code: 'RA', name: 'Royal Nepal Airlines' },
-  { code: 'SG', name: 'SpiceJet' },
-  { code: 'SN', name: 'Brussels Airlines' },
-  { code: 'SQ', name: 'Singapore Airlines' },
-  { code: 'SV', name: 'Saudia' },
-  { code: 'TG', name: 'Thai Airways International' },
-  { code: 'TR', name: 'Tigerair' },
-  { code: 'UA', name: 'United Airlines' },
-  { code: 'UL', name: 'SriLankan Airlines' },
-  { code: 'UK', name: 'Vistara' },
-  { code: 'VN', name: 'Vietnam Airlines' },
-  { code: 'VY', name: 'Vueling' },
-  { code: 'WN', name: 'Southwest Airlines' },
-  { code: 'ZE', name: 'Eastar Jet' },
-];
+const AIRLINES = [...new Map(ALL_AIRLINES.map(item => [item.code, item])).values()]
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 /**
  * TravelVerificationForm Component
@@ -180,32 +53,6 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return selectedDate <= today; // Must be today or in past (NOT future)
-  };
-
-  // Helper to find airport code from name or code
-  const findBestMatchingAirport = (searchString) => {
-    if (!searchString) return '';
-
-    const search = searchString.toString().toUpperCase().trim();
-
-    // 1. Exact Code Match
-    const exactCode = AIRPORTS.find(a => a.code === search);
-    if (exactCode) return exactCode.code;
-
-    // 2. Exact Name Match (case insensitive)
-    const exactName = AIRPORTS.find(a => a.name.toUpperCase() === search);
-    if (exactName) return exactName.code;
-
-    // 3. Contains Name Match (e.g. "Heathrow" in "London Heathrow Airport")
-    const partialName = AIRPORTS.find(a => a.name.toUpperCase().includes(search));
-    if (partialName) return partialName.code;
-
-    // 4. Reverse Contains Match (e.g. search "London Heathrow Airport" and list has "Heathrow")
-    // Less common but possible if list name is shorter
-    const reversePartial = AIRPORTS.find(a => search.includes(a.name.toUpperCase()));
-    if (reversePartial) return reversePartial.code;
-
-    return '';
   };
 
   const handleChange = (e) => {
@@ -259,19 +106,10 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
     }
 
     setValidationErrors(newErrors);
-
-    setFormData(prev => {
-      const updates = { [name]: value };
-
-      // Auto-fill flight number with airline code when airline changes
-      // This allows the user to just type the digits (e.g. UL -> user types 605 -> UL605)
-      if (name === 'airline') {
-        updates.flightNumber = value;
-      }
-
-      return { ...prev, ...updates };
-    });
-
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
     setError(null);
     setSuccessMessage(null);
   };
@@ -288,24 +126,17 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
 
       const flightRoute = await fetchFlightRoute(airline, flightNumber, dateOfTravel);
 
-      if (flightRoute && (flightRoute.originAirport || flightRoute.originIata)) {
+      if (flightRoute && flightRoute.originAirport && flightRoute.destinationAirport) {
         console.log('✅ [AUTO-FILL] Successfully fetched route:', flightRoute.originAirport, '→', flightRoute.destinationAirport);
-
-        // Resolve best matching codes for dropdowns
-        const originCode = findBestMatchingAirport(flightRoute.originIata || flightRoute.originAirport);
-        const destCode = findBestMatchingAirport(flightRoute.destinationIata || flightRoute.destinationAirport);
-
-        console.log(`   Resolved Codes: Origin=${originCode} (from ${flightRoute.originAirport}), Dest=${destCode} (from ${flightRoute.destinationAirport})`);
-
         setFormData(prev => ({
           ...prev,
-          originAirport: originCode,
-          destinationAirport: destCode
+          originAirport: flightRoute.originIata || flightRoute.originAirport,
+          destinationAirport: flightRoute.destinationIata || flightRoute.destinationAirport
         }));
-
         setRouteInfo(flightRoute);
         setError(null);
-        setSuccessMessage(`✅ Flight route auto-filled: ${flightRoute.originAirport} → ${flightRoute.destinationAirport}`);
+        // Success message removed as per user request
+        setSuccessMessage(null);
       } else {
         console.log('⚠️ [AUTO-FILL] No route data received');
         setRouteInfo(null);
@@ -397,10 +228,17 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
     }
 
     try {
+      // Ensure airline code is attached to flight number
+      let fullFlightNum = formData.flightNumber.toUpperCase().trim();
+      const airlineCode = formData.airline.toUpperCase().trim();
+      if (!fullFlightNum.startsWith(airlineCode)) {
+        fullFlightNum = `${airlineCode}${fullFlightNum}`;
+      }
+
       // Call verification service
       const result = await verifyTravelDetails({
         lastName: formData.lastName.trim(),
-        flightNumber: formData.flightNumber.toUpperCase().trim(),
+        flightNumber: fullFlightNum,
         dateOfTravel: formData.dateOfTravel,
         originAirport: formData.originAirport.toUpperCase().trim(),
         destinationAirport: formData.destinationAirport.toUpperCase().trim(),
@@ -432,16 +270,16 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Personal Details Section */}
-      <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm border border-gray-200">
-        <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
-          <span className="text-xl">👤</span> Personal Details
+      <div className="bg-black/40 backdrop-blur-xl rounded-xl p-6 shadow-2xl border border-white/10">
+        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          Personal Details
         </h2>
 
         <div className="form-group">
-          <label htmlFor="lastName" className="block text-xs font-medium text-gray-700 mb-1">
-            Last Name <span className="text-red-500">*</span>
+          <label htmlFor="lastName" className="block text-sm font-medium text-gray-300 mb-1.5">
+            Last Name <span className="text-red-400">*</span>
           </label>
           <input
             type="text"
@@ -449,54 +287,54 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
             name="lastName"
             value={formData.lastName}
             onChange={handleChange}
-            className={`w-full px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.lastName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            className={`w-full px-4 py-3 bg-white/5 border rounded-lg text-white placeholder-gray-500 focus:bg-black/60 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all duration-200 ${validationErrors.lastName ? 'border-red-500' : 'border-white/10'
               }`}
             placeholder="Enter your last name"
             disabled={isLoading}
           />
           {validationErrors.lastName && (
-            <p className="text-red-600 text-xs mt-1">❌ {validationErrors.lastName}</p>
+            <p className="text-red-400 text-xs mt-1">{validationErrors.lastName}</p>
           )}
           <p className="text-gray-500 text-xs mt-1">Letters only (no numbers or special characters)</p>
         </div>
       </div>
 
       {/* Travel Confirmation Section */}
-      <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm border border-gray-200">
-        <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
-          <span className="text-xl">✈️</span> Travel Confirmation
+      <div className="bg-black/40 backdrop-blur-xl rounded-xl p-6 shadow-2xl border border-white/10">
+        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          Travel Confirmation
         </h2>
 
-        <div className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="form-group">
-              <label htmlFor="airline" className="block text-xs font-medium text-gray-700 mb-1">
-                Airline <span className="text-red-500">*</span>
+              <label htmlFor="airline" className="block text-sm font-medium text-gray-300 mb-1.5">
+                Airline <span className="text-red-400">*</span>
               </label>
               <select
                 id="airline"
                 name="airline"
                 value={formData.airline}
                 onChange={handleFlightDetailsChange}
-                className={`w-full px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.airline ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                className={`w-full px-4 py-3 bg-white/5 border rounded-lg text-white focus:bg-black/80 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all duration-200 ${validationErrors.airline ? 'border-red-500' : 'border-white/10'
                   }`}
                 disabled={isLoading}
               >
-                <option value="">Select Airline</option>
+                <option value="" className="bg-black text-gray-400">Select Airline</option>
                 {AIRLINES.map(airline => (
-                  <option key={airline.code} value={airline.code}>
+                  <option key={airline.code} value={airline.code} className="bg-black text-white">
                     {airline.code} - {airline.name}
                   </option>
                 ))}
               </select>
               {validationErrors.airline && (
-                <p className="text-red-600 text-sm mt-1">❌ {validationErrors.airline}</p>
+                <p className="text-red-400 text-xs mt-1">{validationErrors.airline}</p>
               )}
             </div>
 
             <div className="form-group">
-              <label htmlFor="flightNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                Flight Number <span className="text-red-500">*</span>
+              <label htmlFor="flightNumber" className="block text-sm font-medium text-gray-300 mb-1.5">
+                Flight Number <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
@@ -504,20 +342,20 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
                 name="flightNumber"
                 value={formData.flightNumber}
                 onChange={handleFlightDetailsChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.flightNumber ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                className={`w-full px-4 py-3 bg-white/5 border rounded-lg text-white placeholder-gray-500 focus:bg-black/60 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all duration-200 ${validationErrors.flightNumber ? 'border-red-500' : 'border-white/10'
                   }`}
-                placeholder="e.g., AA123, BA456"
+                placeholder="e.g., AA123"
                 disabled={isLoading}
               />
               {validationErrors.flightNumber && (
-                <p className="text-red-600 text-sm mt-1">❌ {validationErrors.flightNumber}</p>
+                <p className="text-red-400 text-xs mt-1">{validationErrors.flightNumber}</p>
               )}
             </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="dateOfTravel" className="block text-sm font-medium text-gray-700 mb-2">
-              Date of Travel <span className="text-red-500">*</span>
+            <label htmlFor="dateOfTravel" className="block text-sm font-medium text-gray-300 mb-1.5">
+              Date of Travel <span className="text-red-400">*</span>
             </label>
             <input
               type="date"
@@ -526,12 +364,12 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
               value={formData.dateOfTravel}
               onChange={handleFlightDetailsChange}
               max={today}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.dateOfTravel ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              className={`w-full px-4 py-3 bg-white/5 border rounded-lg text-white font-medium [color-scheme:dark] focus:bg-black/60 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all duration-200 ${validationErrors.dateOfTravel ? 'border-red-500' : 'border-white/10'
                 }`}
               disabled={isLoading}
             />
             {validationErrors.dateOfTravel && (
-              <p className="text-red-600 text-sm mt-1">❌ {validationErrors.dateOfTravel}</p>
+              <p className="text-red-400 text-xs mt-1">{validationErrors.dateOfTravel}</p>
             )}
           </div>
 
@@ -541,34 +379,28 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
               type="button"
               onClick={handleManualFetchClick}
               disabled={isFetchingRoute || isLoading}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-black hover:bg-gray-200 disabled:bg-gray-600 disabled:text-gray-400 rounded-lg font-medium transition-all shadow-lg shadow-white/5"
             >
               {isFetchingRoute ? (
-                <>
-                  <span className="inline-block animate-spin">🔄</span>
-                  <span>Verifying Flight...</span>
-                </>
+                <span>Verifying Flight...</span>
               ) : (
-                <>
-                  <span>🔄</span>
-                  <span>Verify Flight Details</span>
-                </>
+                <span>Verify Flight Details</span>
               )}
             </button>
             {isFetchingRoute && (
-              <p className="text-blue-600 text-sm mt-2">Checking with Amadeus API...</p>
+              <p className="text-blue-400 text-xs mt-2">Checking with Amadeus API...</p>
             )}
           </div>
 
           {/* Messages */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
               {error}
             </div>
           )}
 
           {successMessage && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-700 text-sm">
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-green-400 text-sm">
               {successMessage}
             </div>
           )}
@@ -576,58 +408,52 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
           {/* Airport Fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="form-group">
-              <label htmlFor="originAirport" className="block text-sm font-medium text-gray-700 mb-2">
-                From Airport <span className="text-red-500">*</span>
+              <label htmlFor="originAirport" className="block text-sm font-medium text-gray-300 mb-1.5">
+                From Airport <span className="text-red-400">*</span>
               </label>
               <select
                 id="originAirport"
                 name="originAirport"
                 value={formData.originAirport}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.originAirport ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                className={`w-full px-4 py-3 bg-white/5 border rounded-lg text-white focus:bg-black/80 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all duration-200 ${validationErrors.originAirport ? 'border-red-500' : 'border-white/10'
                   }`}
                 disabled={isLoading || isFetchingRoute}
               >
-                <option value="">Select Origin Airport</option>
+                <option value="" className="bg-black text-gray-400">Select Origin</option>
                 {AIRPORTS.map(airport => (
-                  <option key={`origin-${airport.code}`} value={airport.code}>
+                  <option key={`origin-${airport.code}`} value={airport.code} className="bg-black text-white">
                     {airport.code} - {airport.name}
                   </option>
                 ))}
               </select>
               {validationErrors.originAirport && (
-                <p className="text-red-600 text-sm mt-1">❌ {validationErrors.originAirport}</p>
-              )}
-              {routeInfo?.originAirport && (
-                <p className="text-green-600 text-xs mt-1">✅ Auto-filled: {routeInfo.originAirport}</p>
+                <p className="text-red-400 text-xs mt-1">{validationErrors.originAirport}</p>
               )}
             </div>
 
             <div className="form-group">
-              <label htmlFor="destinationAirport" className="block text-sm font-medium text-gray-700 mb-2">
-                To Airport <span className="text-red-500">*</span>
+              <label htmlFor="destinationAirport" className="block text-sm font-medium text-gray-300 mb-1.5">
+                To Airport <span className="text-red-400">*</span>
               </label>
               <select
                 id="destinationAirport"
                 name="destinationAirport"
                 value={formData.destinationAirport}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${validationErrors.destinationAirport ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                className={`w-full px-4 py-3 bg-white/5 border rounded-lg text-white focus:bg-black/80 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all duration-200 ${validationErrors.destinationAirport ? 'border-red-500' : 'border-white/10'
                   }`}
                 disabled={isLoading || isFetchingRoute}
               >
-                <option value="">Select Destination Airport</option>
+                <option value="" className="bg-black text-gray-400">Select Destination</option>
                 {AIRPORTS.map(airport => (
-                  <option key={`dest-${airport.code}`} value={airport.code}>
+                  <option key={`dest-${airport.code}`} value={airport.code} className="bg-black text-white">
                     {airport.code} - {airport.name}
                   </option>
                 ))}
               </select>
               {validationErrors.destinationAirport && (
-                <p className="text-red-600 text-sm mt-1">❌ {validationErrors.destinationAirport}</p>
-              )}
-              {routeInfo?.destinationAirport && (
-                <p className="text-green-600 text-xs mt-1">✅ Auto-filled: {routeInfo.destinationAirport}</p>
+                <p className="text-red-400 text-xs mt-1">{validationErrors.destinationAirport}</p>
               )}
             </div>
           </div>
@@ -635,19 +461,19 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
       </div>
 
       {/* Other Information Section */}
-      <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <span className="text-2xl">ℹ️</span> Other Information
-          <span className="text-sm text-gray-500 font-normal">(Optional)</span>
+      <div className="bg-black/40 backdrop-blur-xl rounded-xl p-6 shadow-2xl border border-white/10">
+        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          Other Information
+          <span className="text-sm text-gray-400 font-normal">(Optional)</span>
         </h2>
 
-        <p className="text-gray-600 text-sm mb-4">
+        <p className="text-gray-400 text-sm mb-6">
           Providing additional details helps us verify your travel and speed up luggage recovery.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="form-group">
-            <label htmlFor="baggageTag" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="baggageTag" className="block text-sm font-medium text-gray-300 mb-1.5">
               Baggage Tag Number
             </label>
             <input
@@ -656,14 +482,14 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
               name="baggageTag"
               value={formData.baggageTag}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:bg-black/60 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all duration-200"
               placeholder="Found on your baggage claim"
               disabled={isLoading}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="pnr" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="pnr" className="block text-sm font-medium text-gray-300 mb-1.5">
               PNR (Booking Reference)
             </label>
             <input
@@ -672,14 +498,14 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
               name="pnr"
               value={formData.pnr}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:bg-black/60 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all duration-200"
               placeholder="6-character booking code"
               disabled={isLoading}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="ticketNumber" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="ticketNumber" className="block text-sm font-medium text-gray-300 mb-1.5">
               Ticket Number
             </label>
             <input
@@ -688,14 +514,14 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
               name="ticketNumber"
               value={formData.ticketNumber}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:bg-black/60 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all duration-200"
               placeholder="13-digit ticket number"
               disabled={isLoading}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="passportNumber" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="passportNumber" className="block text-sm font-medium text-gray-300 mb-1.5">
               Passport Number
             </label>
             <input
@@ -704,7 +530,7 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
               name="passportNumber"
               value={formData.passportNumber}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:bg-black/60 focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all duration-200"
               placeholder="For identity confirmation"
               disabled={isLoading}
             />
@@ -713,24 +539,25 @@ const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
       </div>
 
       {/* Form Actions */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-4">
         <button
           type="submit"
           disabled={isLoading || isFetchingRoute}
-          className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors"
+          className="order-1 sm:order-2 flex-1 px-6 py-3.5 bg-white text-black hover:bg-gray-200 disabled:bg-gray-600 disabled:text-gray-400 font-bold rounded-xl transition-all shadow-lg shadow-white/10"
         >
-          {isLoading ? '⏳ Verifying...' : '✅ Verify & Continue'}
+          {isLoading ? 'Verifying...' : 'Verify & Continue'}
         </button>
         <button
           type="button"
           onClick={onCancel}
           disabled={isLoading || isFetchingRoute}
-          className="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-800 font-semibold rounded-lg transition-colors"
+          className="order-2 sm:order-1 flex-1 px-6 py-3.5 border border-white/20 text-white hover:bg-white/10 disabled:bg-transparent disabled:text-gray-600 font-medium rounded-xl transition-colors"
         >
           Cancel
         </button>
       </div>
     </form>
+
   );
 };
 

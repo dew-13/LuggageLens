@@ -13,15 +13,15 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 text-sm">
+    <div className="min-h-screen bg-transparent text-sm text-white">
       {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 border-b border-gray-200 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-md' : 'bg-white shadow-sm'}`}>
+      <nav className={`fixed top-0 w-full z-50 border-b border-white/10 transition-all duration-300 ${isScrolled ? 'bg-black/80 backdrop-blur-md shadow-2xl' : 'bg-transparent'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="text-base md:text-lg font-bold text-blue-600">BaggageLens</div>
+            <div className="text-base md:text-lg font-bold text-white tracking-wider">BaggageLens</div>
             <Link
               to="/login"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors"
+              className="bg-white text-black px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-200 transition-colors"
             >
               Log In
             </Link>
@@ -30,82 +30,82 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 mt-16">
-        <div className="text-center">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 mt-16">
+        <div className="text-center relative z-10">
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
             Find Your Lost Luggage
           </h1>
-          <p className="text-base text-gray-600 mb-6 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed">
             Using advanced AI and image recognition technology, we help reunite travelers with their lost luggage efficiently and reliably.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/login"
-              className="bg-blue-600 text-white px-8 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors"
+              className="bg-white text-black px-8 py-3 rounded-lg font-bold text-sm hover:bg-gray-200 transition-all transform hover:scale-105 shadow-lg shadow-white/10"
             >
               Get Started
             </Link>
-            <button className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-2 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors">
+            <button className="bg-transparent text-white border border-white/30 px-8 py-3 rounded-lg font-semibold text-sm hover:bg-white/10 transition-all backdrop-blur-sm">
               Learn More
             </button>
           </div>
         </div>
 
         {/* Features Section */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center hover:shadow-md transition-shadow">
-            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white/5 rounded-xl shadow-2xl border border-white/10 p-8 text-center hover:bg-white/10 transition-all backdrop-blur-sm group">
+            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 border border-white/10">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Smart Matching</h3>
-            <p className="text-gray-600 text-xs">AI-powered matching finds your luggage among thousands of found items.</p>
+            <h3 className="text-base font-bold text-white mb-3 tracking-wide">Smart Matching</h3>
+            <p className="text-gray-400 text-xs leading-relaxed">AI-powered matching finds your luggage among thousands of found items.</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center hover:shadow-md transition-shadow">
-            <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          <div className="bg-white/5 rounded-xl shadow-2xl border border-white/10 p-8 text-center hover:bg-white/10 transition-all backdrop-blur-sm group">
+            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 border border-white/10">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
             </div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Real-Time Tracking</h3>
-            <p className="text-gray-600 text-xs">Track your case status in real-time and get instant notifications.</p>
+            <h3 className="text-base font-bold text-white mb-3 tracking-wide">Real-Time Tracking</h3>
+            <p className="text-gray-400 text-xs leading-relaxed">Track your case status in real-time and get instant notifications.</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center hover:shadow-md transition-shadow">
-            <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+          <div className="bg-white/5 rounded-xl shadow-2xl border border-white/10 p-8 text-center hover:bg-white/10 transition-all backdrop-blur-sm group">
+            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 border border-white/10">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">24/7 Support</h3>
-            <p className="text-gray-600 text-xs">Our staff is available to assist you at every step of the process.</p>
+            <h3 className="text-base font-bold text-white mb-3 tracking-wide">24/7 Support</h3>
+            <p className="text-gray-400 text-xs leading-relaxed">Our staff is available to assist you at every step of the process.</p>
           </div>
         </div>
 
         {/* How It Works */}
-        <div className="mt-12">
-          <h2 className="text-lg font-bold text-gray-900 text-center mb-8">How It Works</h2>
+        <div className="mt-20">
+          <h2 className="text-xl md:text-2xl font-bold text-white text-center mb-12 tracking-wide">How It Works</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
-              { step: '1', title: 'Report', desc: 'Report your lost luggage with details and photos' },
-              { step: '2', title: 'Search', desc: 'AI searches through all found luggage in the system' },
-              { step: '3', title: 'Match', desc: 'Get notified when potential matches are found' },
-              { step: '4', title: 'Retrieve', desc: 'Confirm match and arrange pickup with staff' }
+              { step: '1', title: 'Report', desc: 'Report your lost luggage with details' },
+              { step: '2', title: 'Search', desc: 'AI searches through found items' },
+              { step: '3', title: 'Match', desc: 'Get notified when matches are found' },
+              { step: '4', title: 'Retrieve', desc: 'Confirm match and arrange pickup' }
             ].map((item, idx) => (
-              <div key={idx} className="relative">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
-                  <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto mb-3">
+              <div key={idx} className="relative group">
+                <div className="bg-white/5 rounded-xl border border-white/10 p-6 text-center h-full hover:bg-white/10 transition-all backdrop-blur-sm">
+                  <div className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center font-bold text-sm mx-auto mb-4 shadow-lg shadow-white/20 group-hover:scale-110 transition-transform">
                     {item.step}
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2 text-sm">{item.title}</h3>
-                  <p className="text-gray-600 text-xs">{item.desc}</p>
+                  <h3 className="font-bold text-white mb-2 text-sm uppercase tracking-wider">{item.title}</h3>
+                  <p className="text-gray-400 text-xs leading-relaxed">{item.desc}</p>
                 </div>
                 {idx < 3 && (
-                  <div className="hidden md:block absolute top-1/3 -right-3 text-gray-400">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <div className="hidden md:block absolute top-1/2 -right-4 -translate-y-1/2 text-white/20 z-10">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
                 )}
@@ -116,13 +116,14 @@ export default function LandingPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-blue-600 text-white py-8 mt-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-lg font-bold mb-2">Ready to Find Your Luggage?</h2>
-          <p className="text-blue-100 mb-4 text-sm">Join thousands of travelers who have successfully recovered their luggage.</p>
+      <div className="relative border-y border-white/10 bg-white/5 backdrop-blur-md py-16 mt-12 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-50 pointer-events-none" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <h2 className="text-2xl font-bold mb-4 text-white">Ready to Find Your Luggage?</h2>
+          <p className="text-gray-400 mb-8 text-sm max-w-lg mx-auto">Join thousands of travelers who have successfully recovered their luggage using our BaggeLens AI.</p>
           <Link
             to="/login"
-            className="inline-block bg-white text-blue-600 px-8 py-2 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors"
+            className="inline-block bg-white text-black px-8 py-3 rounded-lg font-bold text-sm hover:bg-gray-200 transition-all shadow-lg shadow-white/10 hover:scale-105"
           >
             Get Started Now
           </Link>
@@ -130,37 +131,37 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-8 text-xs">
+      <footer className="bg-black/90 backdrop-blur-xl text-gray-400 py-12 text-xs border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="text-white font-bold mb-2 text-sm">BaggageLens</h4>
-              <p>Finding lost luggage with AI technology.</p>
+              <h4 className="text-white font-bold mb-4 text-sm tracking-wider uppercase">BaggageLens</h4>
+              <p className="leading-relaxed text-gray-500">Finding lost luggage with advanced AI technology.</p>
             </div>
             <div>
-              <h4 className="text-white font-bold mb-2 text-sm">Product</h4>
+              <h4 className="text-white font-bold mb-4 text-sm tracking-wider uppercase">Product</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white">Features</a></li>
-                <li><a href="#" className="hover:text-white">Pricing</a></li>
+                <li><Link to="/" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link to="/" className="hover:text-white transition-colors">Pricing</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-bold mb-2 text-sm">Company</h4>
+              <h4 className="text-white font-bold mb-4 text-sm tracking-wider uppercase">Company</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white">About</a></li>
-                <li><a href="#" className="hover:text-white">Blog</a></li>
+                <li><Link to="/" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link to="/" className="hover:text-white transition-colors">Blog</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-bold mb-2 text-sm">Legal</h4>
+              <h4 className="text-white font-bold mb-4 text-sm tracking-wider uppercase">Legal</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white">Privacy</a></li>
-                <li><a href="#" className="hover:text-white">Terms</a></li>
+                <li><Link to="/" className="hover:text-white transition-colors">Privacy</Link></li>
+                <li><Link to="/" className="hover:text-white transition-colors">Terms</Link></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-6 text-center">
-            <p>&copy; 2026 BaggageLens. All rights reserved.</p>
+          <div className="border-t border-white/10 pt-8 text-center">
+            <p className="text-gray-600">&copy; 2026 BaggageLens. All rights reserved.</p>
           </div>
         </div>
       </footer>

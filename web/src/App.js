@@ -17,8 +17,6 @@ import PassengerMatches from './passenger/pages/PassengerMatches';
 import MyCases from './passenger/pages/MyCases';
 import ReportLost from './passenger/pages/ReportLost';
 
-import PassengerProfile from './passenger/pages/PassengerProfile';
-
 import useAuthStore from './store/authStore';
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
@@ -30,7 +28,7 @@ function App() {
     // Check if user is already logged in (from localStorage)
     const savedToken = localStorage.getItem('jwt_token');
     const savedUser = localStorage.getItem('user');
-
+    
     if (savedToken && savedUser) {
       try {
         useAuthStore.setState({
@@ -44,7 +42,7 @@ function App() {
         localStorage.removeItem('user');
       }
     }
-
+    
     setIsLoading(false);
   }, []);
 
@@ -76,7 +74,6 @@ function App() {
           <Route path="/passenger/cases/:id" element={<MyCases />} />
           <Route path="/passenger/matches" element={<PassengerMatches />} />
           <Route path="/passenger/report" element={<ReportLost />} />
-          <Route path="/passenger/profile" element={<PassengerProfile />} />
 
           {/* Redirect any unknown routes to landing page */}
           <Route path="*" element={<Navigate to="/" />} />

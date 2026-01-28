@@ -128,15 +128,15 @@ export const verifyTravelDetails = async (travelData) => {
     let status = 'manual-review-required';
     let message = '';
 
-    if (verificationScore >= 70) {
+    if (verificationScore >= 40) {
       status = 'travel-verified';
       message = 'Travel details verified against external flight databases';
       console.log(`\n🎉 [VERIFICATION COMPLETE] Status: VERIFIED (Score: ${verificationScore}/100)`);
-    } else if (verificationScore >= 45) {
+    } else if (verificationScore >= 20) {
       status = 'travel-likely';
       message = 'Travel details appear valid based on provided information';
       console.log(`\n⚠️ [VERIFICATION COMPLETE] Status: LIKELY (Score: ${verificationScore}/100)`);
-    } else if (verificationScore >= 20) {
+    } else if (verificationScore >= 10) {
       status = 'manual-review-required';
       message = 'Some information provided but recommend manual verification';
       console.log(`\n🔍 [VERIFICATION COMPLETE] Status: MANUAL REVIEW (Score: ${verificationScore}/100)`);

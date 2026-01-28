@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import signupVideo from './images/signup.mp4';
-import loginVideo from './images/login.mp4';
-import loginBg from './images/loginbg.jpg';
 import useAuthStore from './store/authStore';
 import apiClient from './services/apiClient';
 
@@ -47,7 +44,7 @@ export default function LoginPage() {
       });
 
       console.log('Login successful:', data);
-      
+
       // Handle "Remember me" functionality
       if (rememberMe) {
         localStorage.setItem('savedEmail', loginEmail);
@@ -56,19 +53,19 @@ export default function LoginPage() {
         localStorage.removeItem('savedEmail');
         localStorage.removeItem('savedPassword');
       }
-      
+
       // Save token and user info
       localStorage.setItem('jwt_token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      
+
       // Update auth store
       setToken(data.token);
       setUser(data.user);
-      
+
       // Reset form
       setLoginEmail('');
       setLoginPassword('');
-      
+
       // Redirect to dashboard based on role
       if (data.user.role === 'passenger') {
         navigate('/passenger/dashboard');
@@ -115,7 +112,7 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
-      
+
       // Verify user was created in database
       if (!data.user || !data.user._id || !data.token) {
         throw new Error('User registration incomplete - invalid response from server');
@@ -140,7 +137,7 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       console.log('Google Signup Success');
-      
+
       // Send Google credential to backend for verification and account creation
       const response = await fetch('http://localhost:5000/api/auth/google-register', {
         method: 'POST',
@@ -161,7 +158,7 @@ export default function LoginPage() {
       // Save token and user info
       localStorage.setItem('jwt_token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      
+
       // Update auth store
       setToken(data.token);
       setUser(data.user);
@@ -170,10 +167,10 @@ export default function LoginPage() {
       setSignupEmail('');
       setSignupPassword('');
       setSignupConfirm('');
-      
+
       alert('Registration successful! Welcome to BaggageLens');
       setIsSignUp(false);
-      
+
       // Redirect to dashboard
       setTimeout(() => {
         navigate('/passenger/dashboard');
@@ -190,7 +187,7 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       console.log('Google Login Success');
-      
+
       // Send Google credential to backend for verification
       const response = await fetch('http://localhost:5000/api/auth/google-login', {
         method: 'POST',
@@ -211,7 +208,7 @@ export default function LoginPage() {
       // Save token and user info
       localStorage.setItem('jwt_token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      
+
       // Update auth store
       setToken(data.token);
       setUser(data.user);
@@ -219,7 +216,7 @@ export default function LoginPage() {
       // Reset form
       setLoginEmail('');
       setLoginPassword('');
-      
+
       // Redirect to dashboard based on role
       if (data.user.role === 'passenger') {
         navigate('/passenger/dashboard');
@@ -263,220 +260,302 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen md:h-screen flex items-center justify-center px-2 sm:px-4 py-4 md:py-0" style={{
-      backgroundImage: `url(${loginBg})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
-      margin: 0,
-      padding: 0
-    }}>
-      <div className={`container rounded-lg md:rounded-xl overflow-hidden border relative w-full md:w-[650px] min-h-[600px] sm:min-h-[650px] md:min-h-[480px] ${isSignUp ? 'right-panel-active' : ''}`}
-        style={{ 
-          background: 'rgba(19, 52, 88, 0.5)',
-          backdropFilter: 'blur(15px)',
-          border: '1.5px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: `
-            0 0 40px rgba(0, 0, 0, 0.5),
-            0 20px 60px rgba(0, 0, 0, 0.4),
-            inset 0 1px 20px rgba(255, 255, 255, 0.15),
-            inset 0 -2px 15px rgba(0, 0, 0, 0.2),
-            0 0 30px rgba(19, 52, 88, 0.6)
-          `,
-          transition: 'all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)',
-          perspective: '1000px',
-          transformStyle: 'preserve-3d'
+    <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
+      <div className={`relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl w-full max-w-[850px] min-h-[600px] overflow-hidden ${isSignUp ? 'right-panel-active' : ''}`}
+        style={{
+          transition: 'all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)'
         }}>
+
         {/* Mobile Toggle Buttons */}
-        <div className="md:hidden absolute top-0 left-0 right-0 flex z-50 bg-white">
+        <div className="md:hidden absolute top-0 left-0 right-0 flex z-50 bg-black/50 border-b border-white/10">
           <button
             onClick={() => setIsSignUp(false)}
-            className={`flex-1 py-3 font-bold text-sm transition-colors ${!isSignUp ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            className={`flex-1 py-4 font-bold text-sm transition-colors ${!isSignUp ? 'text-white border-b-2 border-white' : 'text-gray-400 hover:text-white'}`}
           >
             Log In
           </button>
           <button
             onClick={() => setIsSignUp(true)}
-            className={`flex-1 py-3 font-bold text-sm transition-colors ${isSignUp ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            className={`flex-1 py-4 font-bold text-sm transition-colors ${isSignUp ? 'text-white border-b-2 border-white' : 'text-gray-400 hover:text-white'}`}
           >
             Sign Up
           </button>
         </div>
+
         {/* Sign Up Form */}
-        <div className="form-container sign-up-container absolute top-12 md:top-0 md:right-0 left-0 md:left-auto h-[calc(100%-48px)] md:h-full w-full md:w-1/2 transition-all duration-700" style={isSignUp ? { transform: 'translateX(0)', opacity: 1, zIndex: 5 } : { transform: 'translateX(100%)', opacity: 0, zIndex: 1, pointerEvents: 'none' }}>
-          <form onSubmit={handleSignup} className="h-full flex flex-col justify-center items-center px-4 sm:px-6 py-6 sm:py-8 overflow-y-auto" style={{ background: '#d9ebee', gap: '8px' }}>
-            <h1 className="font-bold text-base sm:text-lg md:text-xl mb-6 text-center w-full" style={{color:'#014769'}}>Create Account</h1>
-            <div className="w-full flex flex-col gap-2">
-              <div>
-                <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="signup-email">Email</label>
-                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="0 0 32 32" height={16} className="text-gray-600"><g data-name="Layer 3" id="Layer_3"><path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z" fill="currentColor" /></g></svg>
-                  <input id="signup-email" type="email" placeholder="Enter your Email" value={signupEmail} onChange={e => setSignupEmail(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
+        <div className="absolute top-0 h-full transition-all duration-700 w-full md:w-1/2 left-0 opacity-0 z-10 form-container-signup"
+          style={isSignUp ? { transform: 'translateX(100%)', opacity: 1, zIndex: 5, pointerEvents: 'auto' } : { transform: 'translateX(0%)', opacity: 0, zIndex: 1, pointerEvents: 'none' }}>
+          <form onSubmit={handleSignup} className="h-full flex flex-col justify-center items-center px-8 md:px-12 py-8 bg-transparent text-center">
+            <h1 className="font-bold text-3xl mb-6 text-white tracking-tight">Create Account</h1>
+
+            <div className="w-full space-y-4">
+              <div className="text-left group">
+                <label className="text-xs font-semibold text-gray-300 ml-1 mb-1 block transition-colors group-focus-within:text-white">Email</label>
+                <div className="flex items-center px-4 py-3 rounded-lg border border-white/10 bg-white/5 focus-within:bg-black/40 focus-within:border-white/30 transition-all">
+                  <svg className="w-4 h-4 text-gray-400 group-focus-within:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <input
+                    type="email"
+                    placeholder="Enter your Email"
+                    value={signupEmail}
+                    onChange={e => setSignupEmail(e.target.value)}
+                    className="ml-3 bg-transparent border-none w-full focus:outline-none text-sm text-white placeholder-gray-500"
+                  />
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="signup-password">Password</label>
-                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="-64 0 512 512" height={16} className="text-gray-600"><path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0" fill="currentColor" /><path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0" fill="currentColor" /></svg>
-                  <input id="signup-password" type={showSignupPassword ? 'text' : 'password'} placeholder="Enter your Password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
-                  <button type="button" onClick={() => setShowSignupPassword(!showSignupPassword)} className="text-gray-600 hover:text-gray-800 cursor-pointer transition-colors ml-auto flex-shrink-0" aria-label="Toggle password visibility">
-                    {showSignupPassword ? '👁️' : '👁️‍🗨️'}
+
+              <div className="text-left group">
+                <label className="text-xs font-semibold text-gray-300 ml-1 mb-1 block transition-colors group-focus-within:text-white">Password</label>
+                <div className="flex items-center px-4 py-3 rounded-lg border border-white/10 bg-white/5 focus-within:bg-black/40 focus-within:border-white/30 transition-all">
+                  <svg className="w-4 h-4 text-gray-400 group-focus-within:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <input
+                    type={showSignupPassword ? 'text' : 'password'}
+                    placeholder="Create Password"
+                    value={signupPassword}
+                    onChange={e => setSignupPassword(e.target.value)}
+                    className="ml-3 bg-transparent border-none w-full focus:outline-none text-sm text-white placeholder-gray-500"
+                  />
+                  <button type="button" onClick={() => setShowSignupPassword(!showSignupPassword)} className="text-gray-500 hover:text-white transition-colors">
+                    {showSignupPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="signup-confirm-password">Confirm Password</label>
-                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="-64 0 512 512" height={16} className="text-gray-600"><path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0" fill="currentColor" /><path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0" fill="currentColor" /></svg>
-                  <input id="signup-confirm-password" type={showSignupConfirm ? 'text' : 'password'} placeholder="Confirm Password" value={signupConfirm} onChange={e => setSignupConfirm(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
-                  <button type="button" onClick={() => setShowSignupConfirm(!showSignupConfirm)} className="text-gray-600 hover:text-gray-800 cursor-pointer transition-colors ml-auto flex-shrink-0" aria-label="Toggle password visibility">
-                    {showSignupConfirm ? '👁️' : '👁️‍🗨️'}
+
+              <div className="text-left group">
+                <label className="text-xs font-semibold text-gray-300 ml-1 mb-1 block transition-colors group-focus-within:text-white">Confirm Password</label>
+                <div className="flex items-center px-4 py-3 rounded-lg border border-white/10 bg-white/5 focus-within:bg-black/40 focus-within:border-white/30 transition-all">
+                  <svg className="w-4 h-4 text-gray-400 group-focus-within:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <input
+                    type={showSignupConfirm ? 'text' : 'password'}
+                    placeholder="Confirm Password"
+                    value={signupConfirm}
+                    onChange={e => setSignupConfirm(e.target.value)}
+                    className="ml-3 bg-transparent border-none w-full focus:outline-none text-sm text-white placeholder-gray-500"
+                  />
+                  <button type="button" onClick={() => setShowSignupConfirm(!showSignupConfirm)} className="text-gray-500 hover:text-white transition-colors">
+                    {showSignupConfirm ? 'Hide' : 'Show'}
                   </button>
                 </div>
               </div>
-              <div className="flex items-start gap-1.5 mt-0.5">
-                <input 
-                  id="agree-terms" 
+
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  id="agree-terms"
                   type="checkbox"
                   checked={agreeToTerms}
                   onChange={(e) => setAgreeToTerms(e.target.checked)}
-                  className="w-4 h-4 sm:w-3.5 sm:h-3.5 mt-0.5 cursor-pointer accent-blue-600 rounded flex-shrink-0"
+                  className="w-4 h-4 cursor-pointer accent-white rounded bg-white/10 border-white/20"
                 />
-                <label htmlFor="agree-terms" className="text-xs select-none cursor-pointer font-medium leading-tight mb-1" style={{ color: '#014769' }}>
-                  I agree to the <a href="/terms" className=" hover:underline">Terms and Conditions</a>
+                <label htmlFor="agree-terms" className="text-xs text-gray-400 cursor-pointer">
+                  I agree to the <a href="/terms" className="text-white underline hover:text-gray-300">Terms and Conditions</a>
                 </label>
               </div>
-              <button type="submit" disabled={isLoading} className="w-full  text-white rounded-lg py-2.5 sm:py-2 font-semibold text-xs sm:text-sm hover:bg-gray-800 disabled:bg-gray-400 transition-colors mt-3 cursor-pointer" style={{backgroundColor: '#014769'}}>Sign Up</button>
+
+              <button type="submit" disabled={isLoading} className="w-full bg-white text-black rounded-lg py-3 font-bold text-sm hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                Sign Up
+              </button>
             </div>
-            <div className="w-full flex justify-center mt-2">
-              <GoogleLogin
-                onSuccess={handleGoogleSignupSuccess}
-                onError={() => alert('Registration Failed')}
-                useOneTap
-              />
+
+            <div className="w-full mt-6">
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-white/10"></div>
+                <span className="flex-shrink-0 mx-4 text-xs text-gray-500">Or continue with</span>
+                <div className="flex-grow border-t border-white/10"></div>
+              </div>
+              <div className="flex justify-center mt-2">
+                <GoogleLogin
+                  onSuccess={handleGoogleSignupSuccess}
+                  onError={() => alert('Registration Failed')}
+                  theme="filled_black"
+                  shape="pill"
+                  useOneTap
+                />
+              </div>
             </div>
           </form>
         </div>
+
         {/* Sign In Form */}
-        <div className="form-container sign-in-container absolute top-12 md:top-0 left-0 h-[calc(100%-48px)] md:h-full w-full md:w-1/2 transition-all duration-700" style={isSignUp ? { transform: 'translateX(100%)', opacity: 0, zIndex: 1, pointerEvents: 'none' } : { transform: 'translateX(0)', opacity: 1, zIndex: 5 }}>
-          <form onSubmit={handleLogin} className="h-full flex flex-col justify-center items-center px-4 sm:px-6 py-6 sm:py-8" style={{ background: '#d9ebee', gap: '8px' }}>
-            <h1 className="font-bold text-base sm:text-lg md:text-xl mb-8  text-center w-full" style={{color: '#014769'}}>Let's Login</h1>
-            <div className="w-full flex flex-col gap-2">
-              <div>
-                <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="login-email">Email</label>
-                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="0 0 32 32" height={16} className="text-gray-600"><g data-name="Layer 3" id="Layer_3"><path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z" fill="currentColor" /></g></svg>
-                  <input id="login-email" type="email" placeholder="Enter your Email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
+        <div className="absolute top-0 h-full transition-all duration-700 w-full md:w-1/2 left-0 z-20 form-container-signin"
+          style={isSignUp ? { transform: 'translateX(100%)', opacity: 0, zIndex: 1, pointerEvents: 'none' } : { transform: 'translateX(0%)', opacity: 1, zIndex: 5, pointerEvents: 'auto' }}>
+          <form onSubmit={handleLogin} className="h-full flex flex-col justify-center items-center px-8 md:px-12 py-8 bg-transparent text-center">
+            <h1 className="font-bold text-3xl mb-8 text-white tracking-tight">Welcome Back</h1>
+
+            <div className="w-full space-y-4">
+              <div className="text-left group">
+                <label className="text-xs font-semibold text-gray-300 ml-1 mb-1 block transition-colors group-focus-within:text-white">Email</label>
+                <div className="flex items-center px-4 py-3 rounded-lg border border-white/10 bg-white/5 focus-within:bg-black/40 focus-within:border-white/30 transition-all">
+                  <svg className="w-4 h-4 text-gray-400 group-focus-within:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <input
+                    type="email"
+                    placeholder="Enter your Email"
+                    value={loginEmail}
+                    onChange={e => setLoginEmail(e.target.value)}
+                    className="ml-3 bg-transparent border-none w-full focus:outline-none text-sm text-white placeholder-gray-500"
+                  />
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-semibold text-black text-left block mb-1" htmlFor="login-password">Password</label>
-                <div className="flex items-center px-2 py-0 rounded-lg border-2 border-gray-200 h-10 sm:h-9 transition-all focus-within:border-blue-500 bg-white mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width={16} viewBox="-64 0 512 512" height={16} className="text-gray-600"><path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0" fill="currentColor" /><path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0" fill="currentColor" /></svg>
-                  <input id="login-password" type={showLoginPassword ? 'text' : 'password'} placeholder="Enter your Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className="ml-2 border-none w-full h-full focus:outline-none text-xs text-black placeholder-gray-400 font-poppins" />
-                  <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} className="text-gray-600 hover:text-gray-800 cursor-pointer transition-colors ml-auto flex-shrink-0" aria-label="Toggle password visibility">
-                    {showLoginPassword ? '👁️' : '👁️‍🗨️'}
+
+              <div className="text-left group">
+                <label className="text-xs font-semibold text-gray-300 ml-1 mb-1 block transition-colors group-focus-within:text-white">Password</label>
+                <div className="flex items-center px-4 py-3 rounded-lg border border-white/10 bg-white/5 focus-within:bg-black/40 focus-within:border-white/30 transition-all">
+                  <svg className="w-4 h-4 text-gray-400 group-focus-within:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <input
+                    type={showLoginPassword ? 'text' : 'password'}
+                    placeholder="Enter Password"
+                    value={loginPassword}
+                    onChange={e => setLoginPassword(e.target.value)}
+                    className="ml-3 bg-transparent border-none w-full focus:outline-none text-sm text-white placeholder-gray-500"
+                  />
+                  <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} className="text-gray-500 hover:text-white transition-colors">
+                    {showLoginPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-0.5 gap-2 sm:gap-0 mb-2">
-                <div className="flex items-center gap-1.5">
-                  <input 
-                    id="keep-signed-in" 
-                    type="checkbox" 
+
+              <div className="flex justify-between items-center mt-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <input
+                    id="keep-signed-in"
+                    type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-3 h-3 sm:w-3.5 sm:h-3.5 cursor-pointer accent-green-950 rounded" 
+                    className="w-3.5 h-3.5 cursor-pointer accent-white rounded bg-white/10 border-white/20"
                   />
-                  <label htmlFor="keep-signed-in" className="text-xs select-none cursor-pointer font-medium" style={ {color: '#014769'}}>Remember me</label>
+                  <label htmlFor="keep-signed-in" className="text-gray-400 cursor-pointer hover:text-white transition-colors">Remember me</label>
                 </div>
-                <span 
+                <button
+                  type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-xs font-medium cursor-pointer hover:underline" style={ {color: '#014769'}}
+                  className="text-gray-400 hover:text-white hover:underline transition-colors focus:outline-none"
                 >
                   Forgot password?
-                </span>
+                </button>
               </div>
-              <button type="submit" disabled={isLoading} className="w-full  text-white rounded-lg py-2.5 sm:py-2 font-semibold text-xs sm:text-sm hover:bg-gray-800 disabled:bg-gray-400 transition-colors mt-3 cursor-pointer" style={{backgroundColor: '#014769'}}>Sign In</button>
+
+              <button type="submit" disabled={isLoading} className="w-full bg-white text-black rounded-lg py-3 font-bold text-sm hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                Sign In
+              </button>
             </div>
-            <div className="w-full flex justify-center mt-2">
-              <GoogleLogin
-                onSuccess={handleGoogleLoginSuccess}
-                onError={() => alert('Login Failed')}
-                useOneTap
-              />
+
+            <div className="w-full mt-6">
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-white/10"></div>
+                <span className="flex-shrink-0 mx-4 text-xs text-gray-500">Or continue with</span>
+                <div className="flex-grow border-t border-white/10"></div>
+              </div>
+              <div className="flex justify-center mt-2">
+                <GoogleLogin
+                  onSuccess={handleGoogleLoginSuccess}
+                  onError={() => alert('Login Failed')}
+                  theme="filled_black"
+                  shape="pill"
+                  useOneTap
+                />
+              </div>
             </div>
           </form>
         </div>
-        {/* Overlay */}
-        <div className="overlay-container absolute top-0 left-1/2 w-1/2 h-full overflow-hidden z-100 transition-transform duration-700" style={isSignUp ? { transform: 'translateX(-100%)' } : {}}>
-          <div className="overlay bg-white text-primary absolute left-[-100%] h-full w-[200%] transition-transform duration-700" style={isSignUp ? { transform: 'translateX(50%)', background: '#fff' } : { background: '#fff' }}>
-            <div className="overlay-panel overlay-left absolute flex flex-col items-center justify-center px-1.5 text-center top-0 h-full w-1/2 transition-transform duration-700" style={isSignUp ? { transform: 'translateX(0)' } : { transform: 'translateX(-20%)' }}>
-              <h1 className="font-bold text-2xs text-secondary-dark mb-1" style={{fontSize: '0.85rem'}}>Welcome Back!</h1>
-              <p className="text-2xs font-light mb-2 text-secondary-dark/70 leading-tight" style={{fontSize: '0.55rem'}}>Reconnect with your lost belongings</p>
-              <video
-                src={signupVideo}
-                className="w-64 h-44 mb-1.5 "
-                autoPlay
-                loop
-                muted
-                playsInline
-                aria-label="Sign up animation"
-              />
-              <p className="text-2xs font-light mb-2 text-secondary-dark leading-tight" style={{fontSize: '0.6rem'}}>Already have an account? Sign in to access your luggage tracking and find your belongings</p>
-              <button className="ghost bg-transparent text-secondary-dark font-bold text-2xs mt-1" style={{fontSize: '0.65rem'}} onClick={() => setIsSignUp(false)}>Click Here to Login</button>
+
+        {/* Sliding Overlay */}
+        <div className="absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-700 z-50 hidden md:block"
+          style={{ transform: isSignUp ? 'translateX(-100%)' : 'translateX(0)' }}>
+          <div className="bg-black relative -left-full h-full w-[200%] transition-transform duration-700 flex items-center justify-center border-l border-white/10"
+            style={{ transform: isSignUp ? 'translateX(50%)' : 'translateX(0)' }}>
+
+            {/* Left Overlay Panel (Show on Sign Up) */}
+            <div className="absolute top-0 flex flex-col items-center justify-center h-full w-1/2 left-0 px-12 text-center transition-transform duration-700 space-y-6"
+              style={{ transform: isSignUp ? 'translateX(0)' : 'translateX(-20%)' }}>
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 animate-pulse">
+                <svg className="w-10 h-10 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              <h1 className="font-bold text-3xl text-white">Welcome Back!</h1>
+              <p className="text-gray-400 font-light text-sm leading-relaxed">
+                To keep connected with us please login with your personal info
+              </p>
+              <button
+                className="px-8 py-3 bg-transparent border border-white text-white rounded-lg font-bold text-sm tracking-wider uppercase hover:bg-white hover:text-black transition-all transform active:scale-95"
+                onClick={() => setIsSignUp(false)}
+              >
+                Sign In
+              </button>
             </div>
-            <div className="overlay-panel overlay-right absolute flex flex-col items-center justify-center px-1.5 text-center top-0 h-full w-1/2 right-0 transition-transform duration-700" style={isSignUp ? { transform: 'translateX(20%)' } : { transform: 'translateX(0)' }}>
-              <h1 className="font-bold text-2xs text-secondary-dark mb-1" style={{fontSize: '0.85rem'}}>Hello, Friend!</h1>
-              <p className="text-2xs font-light mb-2 text-secondary-dark/70 leading-tight" style={{fontSize: '0.55rem'}}>Begin your journey to recovery</p>
-              <video
-                src={loginVideo}
-                className="w-46 h-46 mb-1.5 "
-                autoPlay
-                loop
-                muted
-                playsInline
-                aria-label="Login animation"
-              />
-              <p className="text-2xs font-light mb-2  leading-tight" style={{fontSize: '0.6rem', color: '#014769'}}>Don't have an account? Create one to start tracking your luggage and reunite with your belongings</p>
-              <button className="ghost bg-transparent text-secondary-dark font-bold text-2xs mt-1" style={{fontSize: '0.65rem'}} onClick={() => setIsSignUp(true)}>Click Here to Create Account</button>
+
+            {/* Right Overlay Panel (Show on Sign In) */}
+            <div className="absolute top-0 flex flex-col items-center justify-center h-full w-1/2 right-0 px-12 text-center transition-transform duration-700 space-y-6"
+              style={{ transform: isSignUp ? 'translateX(20%)' : 'translateX(0)' }}>
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 animate-pulse">
+                <svg className="w-10 h-10 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+              </div>
+              <h1 className="font-bold text-3xl text-white">Hello, Friend!</h1>
+              <p className="text-gray-400 font-light text-sm leading-relaxed">
+                Enter your personal details and start your journey with BaggageLens
+              </p>
+              <button
+                className="px-8 py-3 bg-transparent border border-white text-white rounded-lg font-bold text-sm tracking-wider uppercase hover:bg-white hover:text-black transition-all transform active:scale-95"
+                onClick={() => setIsSignUp(true)}
+              >
+                Sign Up
+              </button>
             </div>
           </div>
         </div>
+
       </div>
 
       {/* Forgot Password Modal */}
       {showForgotPassword && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 w-96 max-w-full shadow-lg">
-            <h2 className="text-lg font-bold text-black mb-4">Reset Password</h2>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60]">
+          <div className="bg-black border border-white/20 rounded-xl p-8 w-96 max-w-full shadow-2xl relative">
+            <button
+              onClick={() => setShowForgotPassword(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+            <h2 className="text-xl font-bold text-white mb-2">Reset Password</h2>
+            <p className="text-sm text-gray-400 mb-6">Enter your email address to receive a recovery link.</p>
+
             <form onSubmit={handleForgotPassword} className="flex flex-col gap-4">
               <div>
-                <label className="text-xs font-semibold text-black block mb-2">Enter your email address</label>
-                <input 
-                  type="email" 
+                <label className="text-xs font-semibold text-gray-300 block mb-2">Email Address</label>
+                <input
+                  type="email"
                   placeholder="your@email.com"
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-white/50 focus:outline-none text-sm text-white placeholder-gray-600 transition-colors"
                 />
               </div>
-              <p className="text-xs text-gray-600">We'll send you a link to reset your password</p>
-              <div className="flex gap-3">
-                <button 
+
+              <div className="flex gap-3 mt-2">
+                <button
                   type="button"
                   onClick={() => setShowForgotPassword(false)}
-                  className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg text-black font-semibold text-sm hover:bg-gray-100"
+                  className="flex-1 px-4 py-2.5 border border-white/20 rounded-lg text-white font-semibold text-sm hover:bg-white/10 transition-colors"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="submit"
                   disabled={isLoading || !forgotEmail}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 disabled:bg-gray-400"
+                  className="flex-1 px-4 py-2.5 bg-white text-black rounded-lg font-semibold text-sm hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {isLoading ? 'Sending...' : 'Send Reset Link'}
+                  {isLoading ? 'Sending...' : 'Send Link'}
                 </button>
               </div>
             </form>

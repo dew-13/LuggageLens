@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import '../animations.css';
@@ -8,151 +8,168 @@ export default function PassengerNavigation() {
   const location = useLocation();
   const { logout, user } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const navItems = [
+    {
+      path: '/passenger/dashboard',
+      label: 'Dashboard',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+      )
+    },
+    {
+      path: '/passenger/cases',
+      label: 'My Cases',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      )
+    },
+    {
+      path: '/passenger/matches',
+      label: 'Matches',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+      )
+    },
+    {
+      path: '/passenger/report',
+      label: 'Report Lost',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+        </svg>
+      )
+    }
+  ];
+
   return (
-    <nav className={`border-transparent fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-slate-900/70 backdrop-blur-md' : 'bg-transparent'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-12">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/passenger/dashboard" className="text-base font-bold text-white drop-shadow-md">
-              BaggageLens
-            </Link>
+    <>
+      {/* Desktop Header (Logo Only) */}
+      <header className="hidden md:flex fixed top-0 left-0 right-0 h-16 items-center px-6 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10 transition-all duration-300">
+        <Link to="/passenger/dashboard" className="flex items-center gap-3 text-white hover:opacity-80 transition-opacity">
+          <span className="font-bold text-xl tracking-tight">BaggageLens</span>
+        </Link>
+      </header>
 
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8 text-sm">
-            <Link
-              to="/passenger/dashboard"
-              className={`nav-item-animated font-medium text-sm transition-colors text-white drop-shadow-md ${location.pathname === '/passenger/dashboard' ? 'text-green-300' : ''}`}
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/passenger/cases"
-              className={`nav-item-animated font-medium text-sm transition-colors text-white drop-shadow-md ${location.pathname === '/passenger/cases' ? 'text-green-300' : ''}`}
-            >
-              My Cases
-            </Link>
-            <Link
-              to="/passenger/matches"
-              className={`nav-item-animated font-medium text-sm transition-colors text-white drop-shadow-md ${location.pathname === '/passenger/matches' ? 'text-green-300' : ''}`}
-            >
-              Matches
-            </Link>
-            <Link
-              to="/passenger/report"
-              className={`nav-item-animated font-medium text-sm transition-colors px-3 py-1 rounded text-white drop-shadow-md ${location.pathname === '/passenger/report' ? 'text-green-300' : ''}`}
-            >
-              Report Lost
-            </Link>
-          </div>
-
-          {/* Profile & Mobile Menu */}
-          <div className="flex items-center gap-4">
-            {/* Profile Dropdown - Desktop Only */}
-            <div className="hidden md:block relative">
-              <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-2 text-sm text-white drop-shadow-md"
+      {/* Desktop Sidebar Navigation */}
+      <nav className="hidden md:flex fixed left-0 top-16 bottom-0 flex-col bg-black/20 backdrop-blur-sm z-50 transition-all duration-300 ease-in-out w-16 hover:w-64 group">
+        {/* Navigation Links */}
+        <div className="flex-1 flex flex-col gap-4 py-6 px-2">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 group/item overflow-hidden whitespace-nowrap relative ${isActive
+                  ? 'bg-white text-black shadow-lg shadow-white/20'
+                  : 'text-gray-400 hover:bg-white/10 hover:text-white'
+                  }`}
               >
-                <div className="ml-2 p-1.5 text-white drop-shadow-md">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </button>
-              {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                  <div className="p-4 border-b border-gray-200">
-                    <p className="font-medium" style={{ color: '#123458' }}>Passenger</p>
-                    <p className="text-xs" style={{ color: '#123458' }}>{user?.email || 'passenger@baggage.com'}</p>
-                  </div>
-                  <Link to="/passenger/profile" className="block w-full text-left px-4 py-2 hover:bg-gray-50 text-sm" style={{ color: '#123458' }}>
-                    Profile
-                  </Link>
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-black/20" />
+                )}
 
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 hover:bg-red-50 text-sm" style={{ color: '#123458' }}>
-                    Logout
-                  </button>
+                <div className={`w-6 h-6 min-w-[1.5rem] flex items-center justify-center transition-transform duration-300 ${!isActive && 'group-hover/item:scale-110'}`}>
+                  {item.icon}
                 </div>
-              )}
+
+                <span className={`font-medium text-sm opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0 delay-75`}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Profile / Logout Section */}
+        <div className="p-2 mb-4">
+          <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors cursor-pointer overflow-hidden whitespace-nowrap">
+            <div className="w-8 h-8 min-w-[2rem] rounded-full bg-white flex items-center justify-center text-black border border-white/10 shadow-lg">
+              <span className="font-bold text-xs">{user?.email?.[0]?.toUpperCase() || 'P'}</span>
+            </div>
+
+            <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+              <p className="text-sm font-semibold text-white truncate max-w-[120px]">{user?.email || 'Passenger'}</p>
+              <button
+                onClick={handleLogout}
+                className="text-xs text-red-400 hover:text-red-300 text-left mt-0.5 flex items-center gap-1"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Top Navigation (Original Style) */}
+      <nav className="md:hidden fixed top-0 left-0 right-0 z-40 bg-black/90 backdrop-blur-md border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <Link to="/passenger/dashboard" className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                BaggageLens
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-white drop-shadow-md"
+              className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
               </svg>
             </button>
           </div>
-        </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 bg-slate-800 border-t border-slate-600 card-animated">
-            <div className="px-4 py-2 mb-4 flex items-center gap-2 text-white border-b border-slate-600 pb-4">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm font-medium">Passenger</span>
+          {/* Mobile Menu Dropdown */}
+          {isMenuOpen && (
+            <div className="py-4 border-t border-white/10 space-y-2 animate-in slide-in-from-top-4 duration-200">
+              <div className="px-4 py-2 mb-2 flex items-center gap-3 text-white border-b border-white/10 pb-4">
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-black">
+                  <span className="font-bold text-xs">{user?.email?.[0]?.toUpperCase() || 'P'}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold">Passenger Account</span>
+                  <span className="text-xs text-gray-400">{user?.email || 'passenger@baggage.com'}</span>
+                </div>
+              </div>
+              {navItems.map(item => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === item.path ? 'bg-white text-black' : 'text-gray-300 hover:bg-white/10 hover:text-white'}`}
+                >
+                  <div className="w-5 h-5">{item.icon}</div>
+                  {item.label}
+                </Link>
+              ))}
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-4 py-3 text-red-400 hover:bg-white/5 hover:text-red-300 text-sm mt-2 rounded-lg transition-colors flex items-center gap-3"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                Sign Out
+              </button>
             </div>
-            <Link
-              to="/passenger/dashboard"
-              className={`block px-4 py-2 rounded text-white transition-colors hover:bg-slate-700 ${location.pathname === '/passenger/dashboard' ? 'bg-blue-600' : ''}`}
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/passenger/cases"
-              className={`block px-4 py-2 rounded text-white transition-colors hover:bg-slate-700 ${location.pathname === '/passenger/cases' ? 'bg-blue-600' : ''}`}
-            >
-              My Cases
-            </Link>
-            <Link
-              to="/passenger/matches"
-              className={`block px-4 py-2 rounded text-white transition-colors hover:bg-slate-700 ${location.pathname === '/passenger/matches' ? 'bg-blue-600' : ''}`}
-            >
-              Matches
-            </Link>
-            <Link
-              to="/passenger/report"
-              className={`block px-4 py-2 rounded font-medium text-white transition-colors hover:bg-slate-700 ${location.pathname === '/passenger/report' ? 'bg-blue-600' : ''}`}
-            >
-              Report Lost
-            </Link>
-            <Link
-              to="/passenger/profile"
-              className={`block px-4 py-2 rounded text-white transition-colors hover:bg-slate-700 ${location.pathname === '/passenger/profile' ? 'bg-blue-600' : ''}`}
-            >
-              Profile
-            </Link>
-
-            <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-300 hover:bg-slate-700 text-sm mt-2 rounded transition-colors">
-              Logout
-            </button>
-          </div>
-        )}
-      </div>
-    </nav>
+          )}
+        </div>
+      </nav>
+    </>
   );
 }

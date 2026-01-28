@@ -8,36 +8,44 @@ export default function MatchesHighlights() {
   const matches = useLuggageStore(state => state.matches.slice(0, 3));
 
   return (
-    <div className="card-animated bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-bold" style={{ color: '#133458' }}>Potential Matches</h2>
-        <span className="status-badge-animated bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold inline-block">
+
+    <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-6 shadow-2xl card-animated">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-white">Potential Matches</h2>
+        <span className="bg-white text-black px-2.5 py-1 rounded-full text-xs font-bold shadow-lg shadow-white/20">
           {matches.length}
         </span>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {matches.map((match, index) => (
           <div
             key={match.id}
-            className="card-animated border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors"
+            className="group bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-300 card-animated"
             style={{ animationDelay: `${index * 80}ms` }}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className={`status-badge-animated px-2 py-1 rounded text-xs font-semibold inline-block ${match.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+            <div className="flex items-center justify-between mb-3">
+              <span className={`px-2 py-0.5 rounded-md text-xs font-medium border ${match.status === 'pending'
+                ? 'bg-yellow-500/10 text-yellow-200 border-yellow-500/20'
+                : 'bg-green-500/10 text-green-200 border-green-500/20'
                 }`}>
                 {match.status.charAt(0).toUpperCase() + match.status.slice(1)}
               </span>
-              <span className=" font-bold text-sm" style={{ color: '#133458' }}>{(match.similarity * 100).toFixed(0)}%</span>
+              <span className="font-bold text-sm text-white">{(match.similarity * 100).toFixed(0)}% Match</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
               <div
-                className="progress-bar-animated bg-green-500 h-2 rounded-full"
+                className="progress-bar-animated bg-white h-full rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]"
                 style={{ width: `${match.similarity * 100}%` }}
               />
             </div>
           </div>
         ))}
-        <Link to="/passenger/matches" className="block w-full mt-4 hover:text-blue-800 font-medium text-sm py-2 border border-blue-200 rounded-lg transition-colors text-center" style={{ color: '#133458' }}>
+        {matches.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <p>No matches found yet.</p>
+          </div>
+        )}
+        <Link to="/passenger/matches" className="block w-full mt-6 bg-white text-black font-bold text-sm py-3 rounded-xl hover:bg-gray-200 transition-colors text-center shadow-lg shadow-white/5">
           View All Matches
         </Link>
       </div>
