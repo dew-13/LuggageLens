@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import useAuthStore from './store/authStore';
 import apiClient from './services/apiClient';
+import ThreeDEyes from './components/ThreeDEyes';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function LoginPage() {
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showSignupConfirm, setShowSignupConfirm] = useState(false);
+  const [isPasswordFocus, setIsPasswordFocus] = useState(false);
 
   // Load saved credentials if "Remember me" was checked
   useEffect(() => {
@@ -95,23 +97,12 @@ export default function LoginPage() {
         return;
       }
 
-      // Call backend API to register new passenger user
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: signupEmail,
-          password: signupPassword,
-          role: 'passenger'
-        })
+      // Call backend API to register new passenger user using centralized API client
+      const { data } = await apiClient.post('/auth/register', {
+        email: signupEmail,
+        password: signupPassword,
+        role: 'passenger'
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
-      }
-
-      const data = await response.json();
 
       // Verify user was created in database
       if (!data.user || !data.user._id || !data.token) {
@@ -127,7 +118,8 @@ export default function LoginPage() {
       setIsSignUp(false);
     } catch (error) {
       console.error('Signup error:', error);
-      alert('Signup error: ' + error.message);
+      const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+      alert('Signup error: ' + errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -138,21 +130,11 @@ export default function LoginPage() {
       setIsLoading(true);
       console.log('Google Signup Success');
 
-      // Send Google credential to backend for verification and account creation
-      const response = await fetch('http://localhost:5000/api/auth/google-register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: credentialResponse.credential
-        })
+      // Send Google credential to backend for verification and account creation using centralized API client
+      const { data } = await apiClient.post('/auth/google-register', {
+        token: credentialResponse.credential
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Google signup failed');
-      }
-
-      const data = await response.json();
       console.log('Google signup successful:', data);
 
       // Save token and user info
@@ -177,7 +159,8 @@ export default function LoginPage() {
       }, 500);
     } catch (error) {
       console.error('Signup with Google error:', error);
-      alert('Google signup error: ' + error.message);
+      const errorMessage = error.response?.data?.message || error.message || 'Google signup failed';
+      alert('Google signup error: ' + errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -188,21 +171,11 @@ export default function LoginPage() {
       setIsLoading(true);
       console.log('Google Login Success');
 
-      // Send Google credential to backend for verification
-      const response = await fetch('http://localhost:5000/api/auth/google-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: credentialResponse.credential
-        })
+      // Send Google credential to backend for verification using centralized API client
+      const { data } = await apiClient.post('/auth/google-login', {
+        token: credentialResponse.credential
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Google login failed');
-      }
-
-      const data = await response.json();
       console.log('Google login successful:', data);
 
       // Save token and user info
@@ -227,7 +200,8 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error('Login with Google error:', error);
-      alert('Google login error: ' + error.message);
+      const errorMessage = error.response?.data?.message || error.message || 'Google login failed';
+      alert('Google login error: ' + errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -237,23 +211,18 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotEmail })
+      // Use centralized API client for forgot password
+      await apiClient.post('/auth/forgot-password', {
+        email: forgotEmail
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send reset email');
-      }
 
       alert('Password reset email sent! Check your inbox.');
       setForgotEmail('');
       setShowForgotPassword(false);
     } catch (error) {
       console.error('Forgot password error:', error);
-      alert('Error: ' + error.message);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to send reset email';
+      alert('Error: ' + errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -261,7 +230,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
-      <div className={`relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl w-full max-w-[850px] min-h-[600px] overflow-hidden ${isSignUp ? 'right-panel-active' : ''}`}
+      <div className={`relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl w-full max-w-[850px] min-h-screen md:min-h-[600px] overflow-y-auto md:overflow-hidden ${isSignUp ? 'right-panel-active' : ''}`}
         style={{
           transition: 'all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)'
         }}>
@@ -288,9 +257,12 @@ export default function LoginPage() {
             ${isSignUp
               ? 'top-16 md:top-0 opacity-100 z-20 md:translate-x-full pointer-events-auto'
               : 'top-0 opacity-0 z-10 translate-x-0 pointer-events-none'
-            }`}
+            } overflow-y-auto md:overflow-visible`}
         >
-          <form onSubmit={handleSignup} className="h-full flex flex-col justify-center items-center px-8 md:px-12 py-8 bg-transparent text-center">
+          <form onSubmit={handleSignup} className="h-full flex flex-col justify-start md:justify-center items-center px-8 md:px-12 py-8 pt-10 md:pt-8 bg-transparent text-center">
+            <div className="md:hidden w-full flex justify-center mb-4">
+              <ThreeDEyes isClosed={isPasswordFocus} />
+            </div>
             <h1 className="font-bold text-3xl mb-6 text-white tracking-tight">Create Account</h1>
 
             <div className="w-full space-y-4">
@@ -321,6 +293,8 @@ export default function LoginPage() {
                     placeholder="Create Password"
                     value={signupPassword}
                     onChange={e => setSignupPassword(e.target.value)}
+                    onFocus={() => setIsPasswordFocus(true)}
+                    onBlur={() => setIsPasswordFocus(false)}
                     className="ml-3 bg-transparent border-none w-full focus:outline-none text-sm text-white placeholder-gray-500"
                   />
                   <button type="button" onClick={() => setShowSignupPassword(!showSignupPassword)} className="text-gray-500 hover:text-white transition-colors">
@@ -340,6 +314,8 @@ export default function LoginPage() {
                     placeholder="Confirm Password"
                     value={signupConfirm}
                     onChange={e => setSignupConfirm(e.target.value)}
+                    onFocus={() => setIsPasswordFocus(true)}
+                    onBlur={() => setIsPasswordFocus(false)}
                     className="ml-3 bg-transparent border-none w-full focus:outline-none text-sm text-white placeholder-gray-500"
                   />
                   <button type="button" onClick={() => setShowSignupConfirm(!showSignupConfirm)} className="text-gray-500 hover:text-white transition-colors">
@@ -391,9 +367,12 @@ export default function LoginPage() {
             ${isSignUp
               ? 'top-0 opacity-0 z-10 md:translate-x-full pointer-events-none'
               : 'top-16 md:top-0 opacity-100 z-20 translate-x-0 pointer-events-auto'
-            }`}
+            } overflow-y-auto md:overflow-visible`}
         >
-          <form onSubmit={handleLogin} className="h-full flex flex-col justify-center items-center px-8 md:px-12 py-8 bg-transparent text-center">
+          <form onSubmit={handleLogin} className="h-full flex flex-col justify-start md:justify-center items-center px-8 md:px-12 py-8 pt-10 md:pt-8 bg-transparent text-center">
+            <div className="md:hidden w-full flex justify-center mb-4">
+              <ThreeDEyes isClosed={isPasswordFocus} />
+            </div>
             <h1 className="font-bold text-3xl mb-8 text-white tracking-tight">Welcome Back</h1>
 
             <div className="w-full space-y-4">
@@ -424,6 +403,8 @@ export default function LoginPage() {
                     placeholder="Enter Password"
                     value={loginPassword}
                     onChange={e => setLoginPassword(e.target.value)}
+                    onFocus={() => setIsPasswordFocus(true)}
+                    onBlur={() => setIsPasswordFocus(false)}
                     className="ml-3 bg-transparent border-none w-full focus:outline-none text-sm text-white placeholder-gray-500"
                   />
                   <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} className="text-gray-500 hover:text-white transition-colors">
@@ -453,7 +434,7 @@ export default function LoginPage() {
               </div>
 
               <button type="submit" disabled={isLoading} className="w-full bg-white text-black rounded-lg py-3 font-bold text-sm hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                Sign In
+                Log In
               </button>
             </div>
 
@@ -485,11 +466,7 @@ export default function LoginPage() {
             {/* Left Overlay Panel (Show on Sign Up) */}
             <div className="absolute top-0 flex flex-col items-center justify-center h-full w-1/2 left-0 px-12 text-center transition-transform duration-700 space-y-6"
               style={{ transform: isSignUp ? 'translateX(0)' : 'translateX(-20%)' }}>
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 animate-pulse">
-                <svg className="w-10 h-10 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                </svg>
-              </div>
+              <ThreeDEyes isClosed={isPasswordFocus} />
               <h1 className="font-bold text-3xl text-white">Welcome Back!</h1>
               <p className="text-gray-400 font-light text-sm leading-relaxed">
                 To keep connected with us please login with your personal info
@@ -498,18 +475,14 @@ export default function LoginPage() {
                 className="px-8 py-3 bg-transparent border border-white text-white rounded-lg font-bold text-sm tracking-wider uppercase hover:bg-white hover:text-black transition-all transform active:scale-95"
                 onClick={() => setIsSignUp(false)}
               >
-                Sign In
+                Log In
               </button>
             </div>
 
             {/* Right Overlay Panel (Show on Sign In) */}
             <div className="absolute top-0 flex flex-col items-center justify-center h-full w-1/2 right-0 px-12 text-center transition-transform duration-700 space-y-6"
               style={{ transform: isSignUp ? 'translateX(20%)' : 'translateX(0)' }}>
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 animate-pulse">
-                <svg className="w-10 h-10 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-              </div>
+              <ThreeDEyes isClosed={isPasswordFocus} />
               <h1 className="font-bold text-3xl text-white">Hello, Friend!</h1>
               <p className="text-gray-400 font-light text-sm leading-relaxed">
                 Enter your personal details and start your journey with BaggageLens
