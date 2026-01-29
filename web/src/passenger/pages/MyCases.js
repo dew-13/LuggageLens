@@ -8,6 +8,11 @@ import useLuggageStore from '../../store/luggageStore';
 
 export default function MyCases() {
   const cases = useLuggageStore(state => state.cases);
+  const fetchCases = useLuggageStore(state => state.fetchCases);
+
+  React.useEffect(() => {
+    fetchCases();
+  }, [fetchCases]);
 
   return (
     <div className="min-h-screen relative pt-16 md:pt-20 md:pl-20">

@@ -19,8 +19,8 @@ const AIRLINES = [...new Map(ALL_AIRLINES.map(item => [item.code, item])).values
  * Required fields: Last name, flight number, date of travel, origin, destination
  * Optional fields: Baggage tag, PNR, ticket number, passport (for identity confirmation)
  */
-const TravelVerificationForm = ({ onVerificationComplete, onCancel }) => {
-  const [formData, setFormData] = useState({
+const TravelVerificationForm = ({ onVerificationComplete, onCancel, initialData }) => {
+  const [formData, setFormData] = useState(initialData || {
     lastName: '',
     airline: '',
     flightNumber: '',

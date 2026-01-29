@@ -7,6 +7,11 @@ import useLuggageStore from '../../store/luggageStore';
 
 export default function PassengerMatches() {
   const matches = useLuggageStore(state => state.matches);
+  const fetchMatches = useLuggageStore(state => state.fetchMatches);
+
+  React.useEffect(() => {
+    fetchMatches();
+  }, [fetchMatches]);
 
   return (
     <div className="min-h-screen relative pt-16 md:pt-20 md:pl-20">

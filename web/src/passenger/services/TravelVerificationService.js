@@ -161,9 +161,10 @@ export const verifyTravelDetails = async (travelData) => {
         originAirport,
         destinationAirport,
         lastName,
-        // Don't store full passport in response for security
         passportProvided: !!passportNumber,
-      }
+      },
+      // Return full input data to allow form restoration
+      travelInput: travelData
     };
 
   } catch (error) {

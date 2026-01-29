@@ -2,56 +2,115 @@ import React, { useState } from 'react';
 import PassengerNavigation from '../components/PassengerNavigation';
 import TravelVerificationForm from '../components/TravelVerificationForm';
 import ReportForm from '../components/ReportForm';
+import ScanningLoader from '../components/ScanningLoader';
+import { Link } from 'react-router-dom';
 import '../animations.css';
+import apiClient from '../../services/apiClient';
 
 import useLuggageStore from '../../store/luggageStore';
 
 export default function ReportLost() {
-  const [step, setStep] = useState('verification'); // 'verification' or 'report'
+  // 'verification', 'report', 'retrieve' (step 3 & 4 combined as result)
+  const [step, setStep] = useState('verification');
   const [verificationData, setVerificationData] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState(null);
+
   const addCase = useLuggageStore(state => state.addCase);
+  const setMatches = useLuggageStore(state => state.setMatches); // Get the action
 
   const handleVerificationComplete = (verificationResult) => {
-    // Store verification data for luggage report
     setVerificationData(verificationResult);
-    // Move to next step
     setStep('report');
   };
 
   const handleVerificationCancel = () => {
-    // Reset everything
+    // Go back to verification step, preserving data in verificationData 
+    // (TravelVerificationForm is now updated to accept initialData)
     setStep('verification');
-    setVerificationData(null);
   };
 
   const handleReportSubmit = async (formData) => {
+    setIsLoading(true);
     try {
-      // Combine verification data with luggage report data
-      const completeReport = {
-        ...formData,
-        verification: verificationData,
-        date: new Date().toISOString(),
-        status: 'pending'
+      // Create FormData for file upload
+      const data = new FormData();
+      data.append('description', formData.description);
+      data.append('color', formData.color);
+      data.append('brand', formData.brand);
+      data.append('type', 'suitcase');
+
+      // Add flight verification data specifically
+      if (verificationData && verificationData.travelInput) {
+        // Send detailed metadata as a JSON string
+        data.append('metadata', JSON.stringify({
+          flight: verificationData.travelInput,
+          verificationScore: verificationData.score
+        }));
+
+        // Set lost_date to flight date automatically as requested
+        if (verificationData.travelInput.dateOfTravel) {
+          data.append('lost_date', verificationData.travelInput.dateOfTravel);
+        }
+      }
+
+      if (formData.image) {
+        data.append('image', formData.image);
+      } else {
+        alert("Please upload an image of your luggage!");
+        setIsLoading(false);
+        return;
+      }
+
+      // Send to backend
+      const response = await apiClient.post('/luggage/report', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Report success:', response.data);
+
+      const resultData = {
+        luggage: response.data.luggage,
+        matches: response.data.potentialMatches || [],
+        verification: verificationData
       };
 
-      console.log('Submitting complete report with verification:', completeReport);
+      setSubmissionResult(resultData);
 
-      // Update local store state
-      addCase(completeReport);
+      // Update local store cases
+      if (response.data.luggage) {
+        addCase({
+          ...response.data.luggage,
+          verification: verificationData
+        });
+      }
 
-      // TODO: Replace with actual API call to backend
-      // POST to /api/report-lost-luggage with completeReport
+      // Update matches in store with formatted data for UI
+      if (response.data.potentialMatches && response.data.potentialMatches.length > 0) {
+        const formattedMatches = response.data.potentialMatches.map(m => ({
+          id: m.id,
+          lostImage: response.data.luggage.image_url,
+          foundImage: m.image_url,
+          similarity: m.similarity,
+          status: 'pending',
+          date: new Date().toISOString(),
+          description: 'Potential match found by AI'
+        }));
+        setMatches(formattedMatches);
+      } else {
+        setMatches([]); // Clear previous matches if none found
+      }
 
-      setSubmitted(true);
-      setTimeout(() => {
-        // Reset after success
-        setSubmitted(false);
-        setStep('verification');
-        setVerificationData(null);
-      }, 5000);
+      // Move to 'retrieve' step (Success Screen)
+      setStep('retrieve');
+
     } catch (error) {
       console.error('Error submitting report:', error);
+      alert('Failed to submit report. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,55 +118,52 @@ export default function ReportLost() {
     <div className="min-h-screen pt-16 md:pt-20 md:pl-20 relative">
       <PassengerNavigation />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+      {isLoading && <ScanningLoader message="Analyzing Luggage DNA..." />}
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 w-full mb-20">
+
         {/* Progress Stepper */}
         <div className="mb-12">
           <div className="flex items-start justify-between w-full relative">
             {/* Step 1: Verify Travel */}
-            <div className={`flex flex-col items-center relative z-10 flex-1 ${step === 'verification' || step === 'report' || submitted ? 'opacity-100' : 'opacity-50'}`}>
-              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 transition-all duration-300 ${step === 'verification' || step === 'report' || submitted ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'bg-white/5 text-gray-500'
-                }`}>
-                {step === 'report' || submitted ? '✓' : '1'}
+            <div className={`flex flex-col items-center relative z-10 flex-1 opacity-100`}>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 transition-all duration-300 ${step !== 'verification' ? 'bg-white text-black' : 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]'}`}>
+                {step !== 'verification' ? '✓' : '1'}
               </div>
-              <span className={`text-[10px] sm:text-xs font-medium mt-2 text-center transition-colors duration-300 leading-tight ${step === 'verification' || step === 'report' || submitted ? 'text-white' : 'text-gray-500'
-                }`}>VERIFY<br className="sm:hidden" /> TRAVEL</span>
+              <span className="text-[10px] sm:text-xs font-medium mt-2 text-center text-white leading-tight">VERIFY<br className="sm:hidden" /> TRAVEL</span>
             </div>
 
             {/* Line 1-2 */}
-            <div className={`flex-1 h-[1px] mt-4 sm:mt-5 transition-all duration-500 ${step === 'report' || submitted ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/10'}`} />
+            <div className={`flex-1 h-[1px] mt-4 sm:mt-5 transition-all duration-500 ${step !== 'verification' ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/10'}`} />
 
             {/* Step 2: Luggage Details */}
-            <div className={`flex flex-col items-center relative z-10 flex-1 ${step === 'report' || submitted ? 'opacity-100' : 'opacity-50'}`}>
-              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 transition-all duration-300 ${step === 'report' || submitted ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'bg-white/5 text-gray-500'
-                }`}>
-                {submitted ? '✓' : '2'}
+            <div className={`flex flex-col items-center relative z-10 flex-1 ${step !== 'verification' ? 'opacity-100' : 'opacity-50'}`}>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 transition-all duration-300 ${step === 'report' || step === 'retrieve' ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'bg-white/5 text-gray-500'}`}>
+                {step === 'retrieve' ? '✓' : '2'}
               </div>
-              <span className={`text-[10px] sm:text-xs font-medium mt-2 text-center transition-colors duration-300 leading-tight ${step === 'report' || submitted ? 'text-white' : 'text-gray-500'
-                }`}>LUGGAGE<br className="sm:hidden" /> DETAILS</span>
+              <span className={`text-[10px] sm:text-xs font-medium mt-2 text-center transition-colors duration-300 leading-tight ${step === 'report' || step === 'retrieve' ? 'text-white' : 'text-gray-500'}`}>LUGGAGE<br className="sm:hidden" /> DETAILS</span>
             </div>
 
             {/* Line 2-3 */}
-            <div className={`flex-1 h-[1px] mt-4 sm:mt-5 transition-all duration-500 ${submitted ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/10'}`} />
+            <div className={`flex-1 h-[1px] mt-4 sm:mt-5 transition-all duration-500 ${step === 'retrieve' ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/10'}`} />
 
-            {/* Step 3: Search & Match */}
-            <div className={`flex flex-col items-center relative z-10 flex-1 ${submitted ? 'opacity-100' : 'opacity-50'}`}>
-              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 transition-all duration-300 ${submitted ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'bg-white/5 text-gray-500'
-                }`}>
+            {/* Step 3: Search (Result) */}
+            <div className={`flex flex-col items-center relative z-10 flex-1 ${step === 'retrieve' ? 'opacity-100' : 'opacity-50'}`}>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 transition-all duration-300 ${step === 'retrieve' ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'bg-white/5 text-gray-500'}`}>
                 3
               </div>
-              <span className={`text-[10px] sm:text-xs font-medium mt-2 text-center transition-colors duration-300 leading-tight ${submitted ? 'text-white' : 'text-gray-500'
-                }`}>SEARCH &<br className="sm:hidden" /> MATCH</span>
+              <span className={`text-[10px] sm:text-xs font-medium mt-2 text-center transition-colors duration-300 leading-tight ${step === 'retrieve' ? 'text-white' : 'text-gray-500'}`}>RESULT<br className="sm:hidden" /> & MATCH</span>
             </div>
 
             {/* Line 3-4 */}
-            <div className="flex-1 h-[1px] mt-4 sm:mt-5 bg-white/10" />
+            <div className={`flex-1 h-[1px] mt-4 sm:mt-5 transition-all duration-500 ${step === 'retrieve' ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/10'}`} />
 
             {/* Step 4: Retrieve */}
-            <div className="flex flex-col items-center relative z-10 flex-1 opacity-50">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 bg-white/5 text-gray-500">
+            <div className={`flex flex-col items-center relative z-10 flex-1 ${step === 'retrieve' ? 'opacity-100' : 'opacity-50'}`}>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border border-white/20 transition-all duration-300 ${step === 'retrieve' ? 'bg-white/5 text-gray-500' : 'bg-white/5 text-gray-500'}`}>
                 4
               </div>
-              <span className="text-[10px] sm:text-xs font-medium mt-2 text-center text-gray-500 leading-tight">RETRIEVE</span>
+              <span className={`text-[10px] sm:text-xs font-medium mt-2 text-center transition-colors duration-300 leading-tight ${step === 'retrieve' ? 'text-gray-300' : 'text-gray-500'}`}>RETRIEVE</span>
             </div>
           </div>
         </div>
@@ -115,33 +171,17 @@ export default function ReportLost() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white">
-            {step === 'verification' ? 'Report Lost Luggage' : 'Describe Your Luggage'}
+            {step === 'verification' ? 'Report Lost Luggage' : step === 'report' ? 'Describe Your Luggage' : 'Report Analysis Result'}
           </h1>
-          <p className="text-gray-400 mt-2 text-sm">
-            {step === 'verification'
-              ? 'First, verify your travel details to expedite the recovery process.'
-              : 'Now tell us about your lost luggage so we can help find it.'}
-          </p>
         </div>
-
-        {submitted && (
-          <div className="mb-6 success-message bg-white/10 border border-white/20 rounded-lg p-4 backdrop-blur-md" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-            <div className="flex items-center gap-3">
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <p className="text-white font-medium">
-                Report submitted successfully! Our staff will review your verified travel details and luggage description.
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Step 1: Travel Verification */}
         {step === 'verification' && (
           <TravelVerificationForm
             onVerificationComplete={handleVerificationComplete}
-            onCancel={handleVerificationCancel}
+            // Pass the previously verified data (specifically the input part) as initialData
+            initialData={verificationData ? verificationData.travelInput : null}
+            onCancel={() => window.location.href = '/passenger/dashboard'}
           />
         )}
 
@@ -152,7 +192,7 @@ export default function ReportLost() {
             <div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-lg backdrop-blur-md">
               <p className="text-white text-xs font-medium flex items-center gap-2">
                 <span className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center text-[10px]">✓</span>
-                Travel verified: {verificationData.travelData.flightNumber} on {verificationData.travelData.dateOfTravel}
+                Travel verified: {verificationData.flightNumber} on {verificationData.dateOfTravel}
               </p>
               <button
                 onClick={handleVerificationCancel}
@@ -164,10 +204,54 @@ export default function ReportLost() {
 
             <ReportForm
               onSubmit={handleReportSubmit}
-              verificationData={verificationData}
+              onCancel={() => window.location.href = '/passenger/dashboard'}
             />
           </div>
         )}
+
+        {/* Step 3/4: Results */}
+        {step === 'retrieve' && submissionResult && (
+          <div className="bg-black/40 backdrop-blur-xl rounded-xl p-8 border border-white/10 text-center animate-fadeIn">
+            <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-2">Report Filed Successfully!</h2>
+            <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+              Your luggage has been registered. Reference ID: <span className="text-white font-mono">{submissionResult.luggage.id.split('-')[0]}</span>
+            </p>
+
+            {submissionResult.matches.length > 0 ? (
+              <div className="bg-green-900/10 border border-green-500/30 rounded-xl p-6 mb-8 transform hover:scale-[1.02] transition-transform duration-300">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <span className="text-2xl">🎉</span>
+                  <h3 className="text-xl font-bold text-white">We Found Potential Matches!</h3>
+                </div>
+                <p className="text-gray-300 mb-6">
+                  Our AI identified <strong className="text-white">{submissionResult.matches.length}</strong> items that verify closely with your luggage DNA.
+                </p>
+                <Link
+                  to="/passenger/matches"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+                >
+                  View Matches Now <span className="text-lg">→</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-8">
+                <h3 className="text-lg font-bold text-white mb-2">No Immediate Matches</h3>
+                <p className="text-gray-400 text-sm">
+                  Don't worry! Our AI is constantly scanning. We will notify you instantly when a match is found.
+                </p>
+              </div>
+            )}
+
+            <div className="flex justify-center gap-6 mt-8">
+              <Link to="/passenger/dashboard" className="text-gray-400 hover:text-white text-sm transition-colors">Return to Dashboard</Link>
+              <Link to="/passenger/cases" className="text-gray-400 hover:text-white text-sm transition-colors">Track Status</Link>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );

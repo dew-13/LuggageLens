@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../animations.css';
 
 export default function MyCasesList({ cases }) {
@@ -37,7 +38,12 @@ export default function MyCasesList({ cases }) {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button className="text-white hover:text-gray-300 font-semibold text-xs transition-colors hover:underline">View Details</button>
+                    <Link
+                      to={`/passenger/cases/${lugCase.id}`}
+                      className="text-white hover:text-gray-300 font-semibold text-xs transition-colors hover:underline"
+                    >
+                      View Details
+                    </Link>
                   </td>
                 </tr>
               ))
@@ -70,9 +76,12 @@ export default function MyCasesList({ cases }) {
                   <span className="text-xs text-gray-400">{new Date(lugCase.date).toLocaleDateString()}</span>
                 </div>
                 <h3 className="font-medium text-white mb-3">{lugCase.description}</h3>
-                <button className="w-full py-2.5 text-center text-white font-medium text-sm border border-white/20 rounded hover:bg-white/10 transition-colors">
+                <Link
+                  to={`/passenger/cases/${lugCase.id}`}
+                  className="block w-full py-2.5 text-center text-white font-medium text-sm border border-white/20 rounded hover:bg-white/10 transition-colors"
+                >
                   View Details
-                </button>
+                </Link>
               </div>
             ))}
           </div>

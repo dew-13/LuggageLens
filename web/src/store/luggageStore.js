@@ -1,58 +1,53 @@
 import { create } from 'zustand';
+import apiClient from '../services/apiClient';
 
 const useLuggageStore = create((set) => ({
-    cases: [
-        {
-            id: 1,
-            description: 'Black leather suitcase with gold handles',
-            date: '2026-01-12',
-            status: 'pending',
-            color: 'Black',
-            brand: 'Samsonite',
-            location: 'JFK Airport',
-            contact: '555-0123'
-        },
-        {
-            id: 2,
-            description: 'Red duffel bag with brown straps',
-            date: '2026-01-11',
-            status: 'matched',
-            color: 'Red',
-            brand: 'Nike',
-            location: 'LHR Airport',
-            contact: '555-0124'
+    cases: [],
+    matches: [],
+    loading: false,
+
+    fetchCases: async () => {
+        set({ loading: true });
+        try {
+            const response = await apiClient.get('/luggage/my-cases');
+            set({ cases: response.data || [] });
+        } catch (error) {
+            console.error('Failed to fetch cases:', error);
+        } finally {
+            set({ loading: false });
         }
-    ],
-    matches: [
-        {
-            id: 1,
-            lostImage: 'https://placehold.co/300x200/png?text=Lost+Bag',
-            foundImage: 'https://placehold.co/300x200/png?text=Found+Match',
-            similarity: 0.94,
-            status: 'pending',
-            date: '2026-01-12',
-            description: 'Black leather suitcase match'
-        },
-        {
-            id: 2,
-            lostImage: 'https://placehold.co/300x200/png?text=Lost+Red+Bag',
-            foundImage: 'https://placehold.co/300x200/png?text=Found+Red+Match',
-            similarity: 0.87,
-            status: 'confirmed',
-            date: '2026-01-11',
-            description: 'Red backpack match'
+    },
+
+    fetchMatches: async () => {
+        set({ loading: true });
+        try {
+            const response = await apiClient.get('/luggage/matches');
+
+            // Transform backend match data to UI format
+            const formattedMatches = (response.data || []).map(m => ({
+                id: m.id, // Match Record ID
+                lostImage: m.lost_luggage?.image_url,
+                foundImage: m.found_luggage?.image_url,
+                similarity: m.similarity,
+                status: m.status,
+                date: m.created_at,
+                description: m.found_luggage?.description || 'Potential match found'
+            }));
+
+            set({ matches: formattedMatches });
+        } catch (error) {
+            console.error('Failed to fetch matches:', error);
+        } finally {
+            set({ loading: false });
         }
-    ],
+    },
 
     addCase: (newCase) => set((state) => ({
-        cases: [
-            {
-                id: state.cases.length + 1,
-                status: 'pending',
-                ...newCase
-            },
-            ...state.cases
-        ]
+        cases: [newCase, ...state.cases]
+    })),
+
+    setMatches: (newMatches) => set(() => ({
+        matches: newMatches
     })),
 
     confirmMatch: (matchId) => set((state) => ({
