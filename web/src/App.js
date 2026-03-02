@@ -15,6 +15,7 @@ import StaffUsers from './staff/pages/StaffUsers';
 import PassengerDashboard from './passenger/pages/PassengerDashboard';
 import PassengerMatches from './passenger/pages/PassengerMatches';
 import MyCases from './passenger/pages/MyCases';
+import CaseDetails from './passenger/pages/CaseDetails';
 import ReportLost from './passenger/pages/ReportLost';
 
 import useAuthStore from './store/authStore';
@@ -28,7 +29,7 @@ function App() {
     // Check if user is already logged in (from localStorage)
     const savedToken = localStorage.getItem('jwt_token');
     const savedUser = localStorage.getItem('user');
-    
+
     if (savedToken && savedUser) {
       try {
         useAuthStore.setState({
@@ -42,7 +43,7 @@ function App() {
         localStorage.removeItem('user');
       }
     }
-    
+
     setIsLoading(false);
   }, []);
 
@@ -71,7 +72,7 @@ function App() {
           {/* Passenger Routes */}
           <Route path="/passenger/dashboard" element={<PassengerDashboard />} />
           <Route path="/passenger/cases" element={<MyCases />} />
-          <Route path="/passenger/cases/:id" element={<MyCases />} />
+          <Route path="/passenger/cases/:id" element={<CaseDetails />} />
           <Route path="/passenger/matches" element={<PassengerMatches />} />
           <Route path="/passenger/report" element={<ReportLost />} />
 
