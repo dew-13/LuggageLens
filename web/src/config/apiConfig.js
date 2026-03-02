@@ -43,8 +43,8 @@ export const API_CONFIG = {
  * Instead, use environment variables and backend proxy:
  * 
  * Development (.env.local):
- * REACT_APP_AVIATIONSTACK_KEY=b819f80ba59d5471b397c6f9a35d2d85
- * REACT_APP_AMADEUS_KEY=xiJ6TMXqHrnsn0y1s2l8EF2NUGczwGX8
+ * REACT_APP_AVIATIONSTACK_KEY=your_aviationstack_key_here
+ * REACT_APP_AMADEUS_KEY=your_amadeus_key_here
  * REACT_APP_BACKEND_URL=http://localhost:5000/api
  * 
  * Production (.env):

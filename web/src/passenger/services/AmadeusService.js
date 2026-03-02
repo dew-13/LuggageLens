@@ -2,7 +2,7 @@
  * Amadeus API Service
  * Provides flight search and schedule data as backup/secondary verification
  * API: https://developers.amadeus.com/
- * Key: xiJ6TMXqHrnsn0y1s2l8EF2NUGczwGX8
+ * Note: API key should be set in environment variables
  */
 
 const AMADEUS_API_KEY = process.env.REACT_APP_AMADEUS_KEY;

@@ -1,0 +1,8 @@
+{
+  "buildCommand": "CI='' npm run build",
+  "env": {
+    "CI": ""
+  },
+  "installCommand": "npm install",
+  "framework": "create-react-app"
+}

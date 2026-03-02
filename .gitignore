@@ -38,6 +38,10 @@ env/
 .env
 .env.local
 .env.*.local
+web/.env
+web/.env.local
+web/.env.development
+web/.env.production
 
 # IDE
 .vscode/

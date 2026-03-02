@@ -2,10 +2,10 @@
  * Aviationstack API Service
  * Verifies flight details against real-time flight data
  * API: https://aviationstack.com/
- * Key: b819f80ba59d5471b397c6f9a35d2d85
+ * Note: API key should be set in environment variables
  */
 
-const AVIATIONSTACK_API_KEY = 'b819f80ba59d5471b397c6f9a35d2d85';
+const AVIATIONSTACK_API_KEY = process.env.REACT_APP_AVIATIONSTACK_KEY;
 const AVIATIONSTACK_BASE_URL = 'http://api.aviationstack.com/v1';
 
 /**
