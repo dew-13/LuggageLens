@@ -54,8 +54,10 @@ build/
 .cache/
 dist/
 
-# Models
+# Models (trained weights - too large for GitHub)
 *.h5
+*.keras
+*.weights.h5
 *.pkl
 *.pth
 *.onnx

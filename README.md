@@ -111,13 +111,13 @@ web/src/passenger/
 ## 🔐 External APIs (Phase 2)
 
 ### Aviationstack (Real-time Flight Data)
-- **Key**: `b819f80ba59d5471b397c6f9a35d2d85`
+- **Key**: `YOUR_AVIATIONSTACK_API_KEY`
 - **URL**: https://api.aviationstack.com/v1/flights
 - **Purpose**: Verify flight exists and matches date/airports
 - **Fallback**: Falls back to Amadeus if unavailable
 
 ### Amadeus (Flight Schedule Data)
-- **Key**: `xiJ6TMXqHrnsn0y1s2l8EF2NUGczwGX8`
+- **Key**: `YOUR_AMADEUS_CLIENT_ID`
 - **URL**: https://api.amadeus.com/v2/shopping/flight-offers
 - **Purpose**: Backup flight verification
 - **Fallback**: Manual review triggered if both APIs fail
@@ -227,21 +227,29 @@ python train.py
 | | | Minimal animations (essential only) |
 | **Mobile** | Flutter | Cross-platform (iOS/Android) app |
 
-## 🗄️ Database (MongoDB)
+## 🗄️ Database Architecture (Dual-Database)
 
-### Collections
-- **Users**: User profiles, roles, authentication
-- **Luggage**: Lost & found luggage records with descriptions
-- **Matches**: Matching results between lost and found items
+We utilize a hybrid database approach combining document-based and vector-based storage to maximize performance for different types of queries:
+
+### 1. MongoDB (Core Data)
+Handles user authentication, profiles, verification, and support items.
+- **Users**: User profiles, roles, authentication credentials
 - **Verifications**: Flight verification records (Phase 2)
 - **Cases**: Support cases and tracking
 
-### Indexes
-- `users.email` - For authentication
-- `luggage.userId` - For user lookups
-- `matches.createdAt` - For sorting
+**Key Indexes:**
+- `users.email` - For fast authentication
 - `verifications.userId` - For verification lookups
-- `verifications.expiresAt` - TTL index (90-day retention)
+- `verifications.expiresAt` - TTL index (90-day data retention)
+
+### 2. Supabase / PostgreSQL (AI & Luggage Data)
+Handles luggage vectors and matching algorithms using `pgvector`.
+- **luggage**: Lost & found luggage records. Links to MongoDB `mongo_user_id`. Includes image storage references, metadata, and CLIP embeddings via `vector(512)`.
+- **matches**: Similarity score mapping between `lost_luggage_id` and `found_luggage_id`, saving AI model predictions.
+
+**Key Features & SQL Functions:**
+- `match_luggage()` - PostgreSQL function utilizing `<=>` cosine distance on vector embeddings to rapidly discover visually similar luggage.
+- Built-in Supabase RLS (Row Level Security) ensuring data privacy.
 
 ## 💾 Storage
 
@@ -521,8 +529,8 @@ module.exports = router;
 ### Environment Variables
 ```bash
 # .env
-AVIATIONSTACK_API_KEY=b819f80ba59d5471b397c6f9a35d2d85
-AMADEUS_API_KEY=xiJ6TMXqHrnsn0y1s2l8EF2NUGczwGX8
+AVIATIONSTACK_API_KEY=your_aviationstack_key
+AMADEUS_API_KEY=your_amadeus_key
 VERIFICATION_RATE_LIMIT=5
 VERIFICATION_RATE_WINDOW=3600000
 ```

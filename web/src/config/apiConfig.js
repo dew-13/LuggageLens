@@ -9,7 +9,7 @@
 export const API_CONFIG = {
   // Aviationstack API for real-time flight tracking
   aviationstack: {
-    apiKey: process.env.REACT_APP_AVIATIONSTACK_KEY || 'b819f80ba59d5471b397c6f9a35d2d85',
+    apiKey: process.env.REACT_APP_AVIATIONSTACK_KEY,
     baseUrl: 'https://api.aviationstack.com/v1',
     endpoints: {
       flights: '/flights',
@@ -18,7 +18,7 @@ export const API_CONFIG = {
 
   // Amadeus API for flight search and schedules
   amadeus: {
-    apiKey: process.env.REACT_APP_AMADEUS_KEY || 'xiJ6TMXqHrnsn0y1s2l8EF2NUGczwGX8',
+    apiKey: process.env.REACT_APP_AMADEUS_KEY,
     baseUrl: 'https://test.api.amadeus.com',
     endpoints: {
       auth: '/v1/security/oauth2/token',

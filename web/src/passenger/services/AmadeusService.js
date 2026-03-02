@@ -5,7 +5,7 @@
  * Key: xiJ6TMXqHrnsn0y1s2l8EF2NUGczwGX8
  */
 
-const AMADEUS_API_KEY = 'xiJ6TMXqHrnsn0y1s2l8EF2NUGczwGX8';
+const AMADEUS_API_KEY = process.env.REACT_APP_AMADEUS_KEY;
 
 /**
  * Search flights with Amadeus API

@@ -4,9 +4,9 @@
  * Returns origin and destination airports for auto-filling
  */
 
-const AVIATIONSTACK_API_KEY = process.env.AVIATIONSTACK_API_KEY || 'b819f80ba59d5471b397c6f9a35d2d85';
-const AMADEUS_CLIENT_ID = process.env.AMADEUS_CLIENT_ID || 'xiJ6TMXqHrnsn0y1s2l8EF2NUGczwGX8';
-const AMADEUS_CLIENT_SECRET = process.env.AMADEUS_CLIENT_SECRET || 'lt2Dgq9KDIHWwOu6';
+const AVIATIONSTACK_API_KEY = process.env.AVIATIONSTACK_API_KEY;
+const AMADEUS_CLIENT_ID = process.env.AMADEUS_CLIENT_ID;
+const AMADEUS_CLIENT_SECRET = process.env.AMADEUS_CLIENT_SECRET;
 
 /**
  * Format flight number to standard format (e.g., AA100)

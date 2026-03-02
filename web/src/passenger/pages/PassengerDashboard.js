@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import PassengerNavigation from '../components/PassengerNavigation';
 import MyLuggageSummary from '../components/MyLuggageSummary';
 import MatchesHighlights from '../components/MatchesHighlights';
+import baggageBeltVideo from '../../images/baggage belt.mp4';
+// import heroImage from '../../images/hero.avif';
 import '../animations.css';
-import GlobeHero3D from '../components/GlobeHero3D';
 
 export default function PassengerDashboard() {
   const [stats, setStats] = useState({
@@ -13,7 +14,6 @@ export default function PassengerDashboard() {
     pendingCases: 0,
     resolvedCases: 0
   });
-
   useEffect(() => {
     fetchStats();
   }, []);
@@ -33,80 +33,152 @@ export default function PassengerDashboard() {
   };
 
   return (
-    <div className="min-h-screen relative pt-16 md:pt-20 md:pl-20">
+    <div className="min-h-screen" style={{ backgroundColor: 'transparent' }}>
       <PassengerNavigation />
-
-
-
+      
       {/* Hero Section */}
-      <div className="relative z-10 py-0 md:py-4 lg:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center min-h-[400px] lg:min-h-0">
+      <div 
+        className="relative overflow-hidden" 
+        style={{ 
+          position: 'relative',
+          minHeight: '500px'
+        }}
+      >
+        {/* Video Background */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 0
+          }}
+        >
+          <source src={baggageBeltVideo} type="video/mp4" />
+          {/* Fallback for browsers that don't support video */}
+          Your browser does not support the video tag.
+        </video>
 
-            {/* 3D Globe - Background on Mobile, Right Side on Desktop */}
-            <div className="absolute inset-x-0 top-0 h-[400px] z-0 opacity-60 lg:opacity-100 lg:static lg:order-2 lg:h-[600px] lg:w-full">
-              <GlobeHero3D />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent lg:hidden pointer-events-none" />
-            </div>
-
-            {/* Content - Overlay on Mobile, Left Side on Desktop */}
-            <div className="relative z-10 text-left space-y-6 pt-8 md:pt-20 lg:pt-0 lg:order-1 pointer-events-none lg:pointer-events-auto">
-              <div className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-white/10 bg-white/5 text-[10px] md:text-xs font-medium text-gray-300 backdrop-blur-md mb-2 pointer-events-auto">
-                ✨ Next Generation Tracking
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white tracking-tight leading-tight">
-                Global <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-500">Luggage Recovery</span>
-              </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-400 max-w-xl leading-relaxed">
-                Advanced AI algorithms that scan, match, and locate your missing items across thousands of airports worldwide.
-              </p>
-              <div className="pt-2 pb-8 md:pb-12 flex flex-nowrap gap-2 md:gap-4 pointer-events-auto">
-                <Link
-                  to="/passenger/report"
-                  className="flex-1 px-3 py-3 md:px-8 md:py-4 bg-white text-black rounded-full font-bold text-[10px] md:text-sm tracking-wide hover:bg-gray-200 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center gap-1 md:gap-2 whitespace-nowrap"
-                >
-                  Start Recovery <span className="text-sm md:text-lg">→</span>
-                </Link>
-                <Link
-                  to="/passenger/cases"
-                  className="flex-1 px-3 py-3 md:px-8 md:py-4 border border-white/20 text-white rounded-full font-bold text-[10px] md:text-sm tracking-wide hover:bg-white/10 transition-all flex items-center justify-center whitespace-nowrap"
-                >
-                  Track Status
-                </Link>
-              </div>
-            </div>
-
+        {/* Overlay for better text readability */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(16, 46, 74, 0.5)',
+            zIndex: 1
+          }}
+        />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-60 relative z-10 mt-8">
+          <div className="text-center">
+            <h1 className="text-xl md:text-3xl lg:text-3xl font-bold text-white mb-6" style={{ background: 'linear-gradient(135deg, #10ff66 0%, #00d4ff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              Welcome to BaggageLens
+            </h1>
+            <p className="text-sm md:text-base text-white mb-10 max-w-3xl mx-auto" style={{ color: '#e0e0e0' }}>
+              Lost your luggage? <br></br>Our AI-powered system helps you find your missing baggage quickly and efficiently.
+            </p>
+            <Link
+              to="/passenger/report"
+              className="inline-block btn-animated px-4 py-2 rounded-lg text-sm font-semibold transform hover:scale-105 transition-all duration-200"
+              style={{ 
+                background: 'rgba(20, 40, 60, 0.4)',
+                backgroundImage: 'linear-gradient(rgba(20, 40, 60, 0.4), rgba(20, 40, 60, 0.4)), linear-gradient(135deg, #10ff66 0%, #00d4ff 100%)',
+                backgroundClip: 'padding-box, border-box',
+                backgroundOrigin: 'padding-box, border-box',
+                border: '2px solid transparent',
+                color: '#e0e0e0',
+                boxShadow: '0 0 20px rgba(16, 255, 102, 0.3), 0 0 40px rgba(0, 212, 255, 0.2)',
+                position: 'relative',
+                opacity: 1
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 30px rgba(16, 255, 102, 0.6), 0 0 60px rgba(0, 212, 255, 0.4), 0 0 80px rgba(16, 255, 102, 0.3)';
+                e.currentTarget.style.color = '#10ff66';
+                e.currentTarget.style.opacity = '1';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(16, 255, 102, 0.3), 0 0 40px rgba(0, 212, 255, 0.2)';
+                e.currentTarget.style.color = '#e0e0e0';
+                e.currentTarget.style.opacity = '0.8';
+              }}
+            >
+              Find My Luggage
+            </Link>
           </div>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 relative z-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          {[
-            { label: 'Reports Filed', value: stats.lostReports, icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-            { label: 'Found Matches', value: stats.foundMatches, icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
-            { label: 'Pending Cases', value: stats.pendingCases, icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-            { label: 'Resolved Cases', value: stats.resolvedCases, icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' }
-          ].map((stat, idx) => (
-            <div key={idx} className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-6 hover:bg-white/5 transition-colors card-animated" style={{ animationDelay: `${idx * 100}ms` }}>
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{stat.label}</p>
-                <div className="p-2 bg-white/5 rounded-lg border border-white/5">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={stat.icon} />
-                  </svg>
-                </div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+          <div className="stat-card rounded-lg shadow-sm p-6" style={{ backgroundColor: '#f1f1f1', borderWidth: '1px', borderColor: '#2596be' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{ color: '#2596be' }}>Reports Filed</p>
+                <p className="stat-number text-3xl font-bold mt-2" style={{ color: '#345770' }}>{stats.lostReports}</p>
               </div>
-              <p className="text-3xl font-bold text-white">{stat.value}</p>
+              <div className="rounded-lg p-3" style={{ backgroundColor: '#2596be20' }}>
+                <svg className="w-6 h-6" style={{ color: '#2596be' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
             </div>
-          ))}
+          </div>
+          <div className="stat-card rounded-lg shadow-sm p-6" style={{ backgroundColor: '#f1f1f1', borderWidth: '1px', borderColor: '#2596be' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{ color: '#b7b7b7' }}>Found Matches</p>
+                <p className="stat-number text-3xl font-bold mt-2" style={{ color: '#345770' }}>{stats.foundMatches}</p>
+              </div>
+              <div className="rounded-lg p-3" style={{ backgroundColor: '#2596be20' }}>
+                <svg className="w-6 h-6" style={{ color: '#2596be' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card bg-white rounded-lg shadow-sm p-6" style={{ backgroundColor: '#f1f1f1', borderWidth: '1px', borderColor: '#2596be' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{ color: '#b7b7b7' }}>Pending Cases</p>
+                <p className="stat-number text-3xl font-bold mt-2" style={{ color: '#345770' }}>{stats.pendingCases}</p>
+              </div>
+              <div className="rounded-lg p-3" style={{ backgroundColor: '#34577020' }}>
+                <svg className="w-6 h-6" style={{ color: '#345770' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card rounded-lg shadow-sm p-6" style={{ backgroundColor: '#f1f1f1', borderWidth: '1px', borderColor: '#2596be' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{ color: '#b7b7b7' }}>Resolved Cases</p>
+                <p className="stat-number text-3xl font-bold mt-2" style={{ color: '#345770' }}>{stats.resolvedCases}</p>
+              </div>
+              <div className="rounded-lg p-3" style={{ backgroundColor: '#2596be20' }}>
+                <svg className="w-6 h-6" style={{ color: '#2596be' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m0 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
             <MyLuggageSummary />
           </div>
           <div>
