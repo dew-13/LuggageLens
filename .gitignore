@@ -59,6 +59,10 @@ build/
 dist/
 
 # Models (trained weights - too large for GitHub)
+ai-model/models/
+*/models/*.h5
+*/models/*.keras
+*/models/*.pth
 *.h5
 *.keras
 *.weights.h5
@@ -67,8 +71,9 @@ dist/
 *.onnx
 
 # Data
-dataset/lost/
-dataset/found/
+dataset/
+ai-model/dataset/
+*/dataset/
 *.csv
 
 # Docker

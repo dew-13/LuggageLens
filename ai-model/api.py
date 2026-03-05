@@ -6,24 +6,23 @@ import numpy as np
 from PIL import Image
 import io
 import os
+import time
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Try to import TensorFlow
-try:
-    import tensorflow as tf
-    from tensorflow import keras
-    HAS_TF = True
-except ImportError:
-    HAS_TF = False
-    print("⚠️  TensorFlow not installed - model loading disabled")
+# ============================================================
+# PyTorch Imports
+# ============================================================
+import torch
+import torch.nn as nn
+from torchvision import transforms, models
 
 app = FastAPI(
     title="BaggageLens AI API",
-    description="ResNet50 Siamese Network for Luggage Matching & Embedding Generation",
-    version="2.0.0"
+    description="ResNet50 + CLIP Ensemble for Luggage Matching & Embedding Generation",
+    version="3.0.0"
 )
 
 # CORS Configuration
@@ -36,110 +35,182 @@ app.add_middleware(
 )
 
 # ============================================================
-# Model Loading
+# Model Definitions
 # ============================================================
-IMAGE_SIZE = (224, 224)  # ResNet50 standard input
-EMBEDDING_DIM = 512      # Must match Supabase vector(512)
+IMAGE_SIZE = 224
+RESNET_EMBEDDING_DIM = 512   # ResNet50 encoder output
+CLIP_EMBEDDING_DIM = 512     # CLIP ViT-B/32 output
 
-siamese_model = None
-encoder_model = None
+# ImageNet normalization (for ResNet50)
+IMAGENET_MEAN = [0.485, 0.456, 0.406]
+IMAGENET_STD = [0.229, 0.224, 0.225]
 
-if HAS_TF:
-    models_dir = os.path.join(os.path.dirname(__file__), 'models')
+resnet_transform = transforms.Compose([
+    transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+])
 
-    def load_via_weights():
-        """
-        Build architecture locally and load trained weights.
-        This is cross-version compatible (works across Python 3.12/3.13, TF 2.19/2.20).
-        """
-        from siamese_model import create_siamese_network
-        
-        encoder_weights = os.path.join(models_dir, 'encoder_weights.weights.h5')
-        siamese_weights = os.path.join(models_dir, 'siamese_weights.weights.h5')
-        
-        if not os.path.exists(encoder_weights):
-            return None, None
-        
-        print("🔄 Building model architecture locally...")
-        siamese, encoder = create_siamese_network()
-        
-        # Load trained weights into the locally-built architecture
-        if os.path.exists(siamese_weights):
-            try:
-                siamese.load_weights(siamese_weights)
-                print(f"✅ Siamese weights loaded from {siamese_weights}")
-            except Exception as e:
-                print(f"⚠️  Siamese weights failed: {e}")
-                siamese = None
-        else:
-            siamese = None
 
+class ResNet50Encoder(nn.Module):
+    """ResNet50-based encoder — must match train_local.py architecture exactly"""
+    def __init__(self, embedding_dim=RESNET_EMBEDDING_DIM):
+        super().__init__()
+        resnet = models.resnet50(weights=None)  # No pretrained; we load our trained weights
+        self.backbone = nn.Sequential(*list(resnet.children())[:-1])
+        self.head = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(2048, 1024),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.3),
+            nn.Linear(1024, embedding_dim),
+        )
+
+    def forward(self, x):
+        features = self.backbone(x)
+        embedding = self.head(features)
+        embedding = nn.functional.normalize(embedding, p=2, dim=1)
+        return embedding
+
+
+# ============================================================
+# Load Models
+# ============================================================
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+models_dir = os.path.join(os.path.dirname(__file__), 'models')
+
+# --- ResNet50 Encoder (trained locally) ---
+resnet_encoder = None
+
+resnet_weight_files = [
+    'encoder_model.pth',
+    'checkpoint_best.pth',
+]
+
+for weight_file in resnet_weight_files:
+    weight_path = os.path.join(models_dir, weight_file)
+    if os.path.exists(weight_path):
         try:
-            encoder.load_weights(encoder_weights)
-            print(f"✅ Encoder weights loaded from {encoder_weights}")
-            print(f"   Output shape: {encoder.output_shape}")
+            print(f"🔄 Loading ResNet50 encoder from {weight_file}...")
+            resnet_encoder = ResNet50Encoder(RESNET_EMBEDDING_DIM).to(device)
+
+            state_dict = torch.load(weight_path, map_location=device, weights_only=True)
+
+            # checkpoint_best.pth has model_state_dict inside it (full siamese)
+            if 'model_state_dict' in state_dict:
+                # Extract encoder weights from full siamese checkpoint
+                full_state = state_dict['model_state_dict']
+                encoder_state = {}
+                for key, value in full_state.items():
+                    if key.startswith('encoder.'):
+                        encoder_state[key.replace('encoder.', '')] = value
+                resnet_encoder.load_state_dict(encoder_state)
+            else:
+                resnet_encoder.load_state_dict(state_dict)
+
+            resnet_encoder.eval()
+            print(f"✅ ResNet50 encoder loaded! (512-dim embeddings)")
+            break
         except Exception as e:
-            print(f"⚠️  Encoder weights failed: {e}")
-            encoder = None
-        
-        return siamese, encoder
+            print(f"⚠️  Failed to load {weight_file}: {e}")
+            resnet_encoder = None
 
-    def load_via_full_model():
-        """Fallback: try loading full .keras or .h5 model files"""
-        class L2Distance(tf.keras.layers.Layer):
-            def call(self, inputs):
-                x1, x2 = inputs
-                return tf.math.sqrt(tf.maximum(
-                    tf.reduce_sum(tf.square(x1 - x2), axis=1, keepdims=True),
-                    tf.keras.backend.epsilon()
-                ))
+if not resnet_encoder:
+    print("⚠️  No trained ResNet50 encoder found.")
+    print("   Train one with: python train_local.py")
 
-        custom_objects = {'L2Distance': L2Distance}
-        loaded_encoder = None
-        loaded_siamese = None
+# --- CLIP Model ---
+clip_model = None
+clip_processor = None
 
-        for name, target in [('encoder_model', 'encoder'), ('siamese_model', 'siamese')]:
-            for ext in ['.keras', '.h5']:
-                path = os.path.join(models_dir, f'{name}{ext}')
-                if os.path.exists(path):
-                    try:
-                        model = keras.models.load_model(
-                            path, custom_objects=custom_objects, compile=False, safe_mode=False
-                        )
-                        print(f"✅ Loaded: {path}")
-                        if target == 'encoder':
-                            loaded_encoder = model
-                        else:
-                            loaded_siamese = model
-                        break
-                    except Exception as e:
-                        print(f"⚠️  Failed {path}: {e}")
-        
-        return loaded_siamese, loaded_encoder
+try:
+    from transformers import CLIPModel, CLIPProcessor
 
-    # Try weights first (most reliable), then full model files
-    print("🔄 Loading trained models...")
-    siamese_model, encoder_model = load_via_weights()
+    print("🔄 Loading CLIP model (openai/clip-vit-base-patch32)...")
 
-    if not encoder_model:
-        print("⚠️  Weights not found, trying full model files...")
-        siamese_model, encoder_model = load_via_full_model()
+    def load_clip_with_retry(retries=2):
+        for i in range(retries):
+            try:
+                model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+                processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+                model.eval()
+                return model, processor
+            except Exception as e:
+                print(f"   ⚠️  CLIP load attempt {i+1}/{retries} failed: {e}")
+                if i < retries - 1:
+                    time.sleep(3)
+        return None, None
 
-    if not encoder_model and not siamese_model:
-        print("📝 No trained models found. Train in Google Colab:")
-        print("   1. Open ai-model/google_colab_training.ipynb in Google Colab")
-        print("   2. Train the model")
-        print("   3. Download encoder_weights.weights.h5 and siamese_weights.weights.h5")
-        print("   4. Place them in ai-model/models/ folder")
-        print("   5. Restart this API")
+    clip_model, clip_processor = load_clip_with_retry()
+    if clip_model:
+        print(f"✅ CLIP model loaded! (512-dim embeddings)")
+    else:
+        print("⚠️  CLIP model not available (will use ResNet50 only)")
+
+except ImportError:
+    print("⚠️  transformers package not installed — CLIP disabled")
+    print("   Install with: pip install transformers")
 
 
-def preprocess_image(image_data: bytes) -> np.ndarray:
-    """Load and preprocess a single image for the model"""
+# ============================================================
+# Helper Functions
+# ============================================================
+
+def preprocess_image_resnet(image_data: bytes) -> torch.Tensor:
+    """Preprocess image for ResNet50 encoder"""
     img = Image.open(io.BytesIO(image_data)).convert('RGB')
-    img = img.resize(IMAGE_SIZE)
-    img_array = np.array(img, dtype=np.float32) / 255.0
-    return np.expand_dims(img_array, axis=0)  # Add batch dimension
+    tensor = resnet_transform(img).unsqueeze(0).to(device)
+    return tensor
+
+
+def preprocess_image_clip(image_data: bytes):
+    """Preprocess image for CLIP"""
+    img = Image.open(io.BytesIO(image_data)).convert('RGB')
+    return img
+
+
+def get_resnet_embedding(image_data: bytes):
+    """Generate 512-dim embedding from ResNet50 encoder"""
+    if not resnet_encoder:
+        return None
+    with torch.no_grad():
+        tensor = preprocess_image_resnet(image_data)
+        embedding = resnet_encoder(tensor)
+        return embedding[0].cpu().numpy().tolist()
+
+
+def get_clip_embedding(image_data: bytes):
+    """Generate 512-dim embedding from CLIP"""
+    if not clip_model or not clip_processor:
+        return None
+    try:
+        with torch.no_grad():
+            img = preprocess_image_clip(image_data)
+            inputs = clip_processor(images=img, return_tensors="pt")
+            features = clip_model.get_image_features(**inputs)
+            # L2 normalize using F.normalize (most reliable across PyTorch versions)
+            embedding = torch.nn.functional.normalize(features, p=2, dim=-1)
+            return embedding[0].cpu().numpy().tolist()
+    except Exception as e:
+        print(f"⚠️ CLIP embedding error: {e}")
+        return None
+
+
+def get_resnet_embedding_from_url(image_url: str):
+    """Generate ResNet50 embedding from image URL"""
+    import requests as req
+    response = req.get(image_url, stream=True, timeout=10)
+    response.raise_for_status()
+    return get_resnet_embedding(response.content)
+
+
+def get_clip_embedding_from_url(image_url: str):
+    """Generate CLIP embedding from image URL"""
+    import requests as req
+    response = req.get(image_url, stream=True, timeout=10)
+    response.raise_for_status()
+    return get_clip_embedding(response.content)
 
 
 # ============================================================
@@ -151,89 +222,104 @@ def health_check():
     """Health check endpoint"""
     return {
         "status": "AI Model API is running",
-        "model": "ResNet50 Siamese Network",
-        "encoder_loaded": encoder_model is not None,
-        "siamese_loaded": siamese_model is not None,
-        "embedding_dim": EMBEDDING_DIM,
-        "image_size": list(IMAGE_SIZE)
+        "version": "3.0.0",
+        "models": {
+            "resnet50": {
+                "loaded": resnet_encoder is not None,
+                "embedding_dim": RESNET_EMBEDDING_DIM,
+                "description": "Trained Siamese ResNet50 encoder (luggage-specific)"
+            },
+            "clip": {
+                "loaded": clip_model is not None,
+                "embedding_dim": CLIP_EMBEDDING_DIM,
+                "description": "OpenAI CLIP ViT-B/32 (general visual features)"
+            }
+        },
+        "ensemble_mode": resnet_encoder is not None and clip_model is not None,
+        "device": str(device)
     }
 
 
 @app.post("/embed")
 async def generate_embedding(image: UploadFile = File(...)):
     """
-    Generate a 512-dimensional embedding vector for a luggage image.
-    This is the primary endpoint used by the Node.js backend to create
-    vectors for storage in Supabase pgvector.
+    Generate embedding(s) for a luggage image.
 
-    Returns:
-        {"embedding": [0.1, 0.2, ...], "shape": [1, 512]}
+    Returns ResNet50 embedding (primary), CLIP embedding (if available),
+    and a fused ensemble embedding.
     """
-    if not encoder_model:
-        raise HTTPException(
-            status_code=503,
-            detail="Encoder model not loaded. Train in Google Colab and place encoder_model.h5 in models/ folder."
-        )
+    if not resnet_encoder and not clip_model:
+        raise HTTPException(status_code=503, detail="No models loaded")
 
     try:
         image_data = await image.read()
-        img_array = preprocess_image(image_data)
 
-        # Generate embedding
-        embedding = encoder_model.predict(img_array, verbose=0)
+        resnet_emb = get_resnet_embedding(image_data)
+        clip_emb = get_clip_embedding(image_data)
 
-        # L2 normalize (should already be normalized, but ensure it)
-        norm = np.linalg.norm(embedding[0])
-        if norm > 0:
-            normalized = (embedding[0] / norm).tolist()
-        else:
-            normalized = embedding[0].tolist()
+        # Primary embedding (prefer ResNet50 since it's trained on luggage)
+        primary_embedding = resnet_emb or clip_emb
 
-        return {
-            "embedding": normalized,
-            "shape": list(embedding.shape),
-            "dimension": EMBEDDING_DIM
+        response = {
+            "embedding": primary_embedding,
+            "dimension": len(primary_embedding),
         }
 
+        # Include individual embeddings if both available
+        if resnet_emb:
+            response["resnet_embedding"] = resnet_emb
+        if clip_emb:
+            response["clip_embedding"] = clip_emb
+
+        response["models_used"] = []
+        if resnet_emb:
+            response["models_used"].append("resnet50")
+        if clip_emb:
+            response["models_used"].append("clip")
+
+        return response
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error generating embedding: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating embedding: {str(e)}")
 
 
 @app.post("/embed-url")
 async def generate_embedding_from_url(data: dict):
     """
     Generate embedding from an image URL.
-    Compatible with the ml-service /embed endpoint signature.
+    Returns both ResNet50 and CLIP embeddings.
 
     Body: {"imageUrl": "https://..."}
-    Returns: {"embedding": [0.1, 0.2, ...]}
     """
-    if not encoder_model:
-        raise HTTPException(
-            status_code=503,
-            detail="Encoder model not loaded."
-        )
+    if not resnet_encoder and not clip_model:
+        raise HTTPException(status_code=503, detail="No models loaded")
 
     try:
-        import requests
         image_url = data.get("imageUrl")
         if not image_url:
             raise HTTPException(status_code=400, detail="imageUrl is required")
 
-        response = requests.get(image_url, stream=True, timeout=10)
+        import requests as req
+        response = req.get(image_url, stream=True, timeout=10)
         response.raise_for_status()
+        image_data = response.content
 
-        img_array = preprocess_image(response.content)
-        embedding = encoder_model.predict(img_array, verbose=0)
+        resnet_emb = get_resnet_embedding(image_data)
+        clip_emb = get_clip_embedding(image_data)
 
-        # L2 normalize
-        norm = np.linalg.norm(embedding[0])
-        normalized = (embedding[0] / norm).tolist() if norm > 0 else embedding[0].tolist()
+        primary_embedding = resnet_emb or clip_emb
 
-        return {"embedding": normalized}
+        return {
+            "embedding": primary_embedding,
+            "clip_embedding": clip_emb,
+            "models_used": [m for m in ["resnet50" if resnet_emb else None,
+                                         "clip" if clip_emb else None] if m]
+        }
 
-    except requests.exceptions.RequestException as e:
-        raise HTTPException(status_code=400, detail=f"Failed to download image: {str(e)}")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -244,34 +330,55 @@ async def compare_images(
     image2: UploadFile = File(...)
 ):
     """
-    Compare two luggage images and return similarity score.
+    Compare two luggage images using ensemble similarity.
 
-    Returns:
-        similarity_score: Float between 0 (different) and 1 (identical)
+    Uses weighted combination of ResNet50 (0.6) and CLIP (0.4) similarity scores.
     """
-    if not encoder_model:
-        raise HTTPException(status_code=503, detail="Encoder not loaded.")
+    if not resnet_encoder and not clip_model:
+        raise HTTPException(status_code=503, detail="No models loaded")
 
     try:
         image1_data = await image1.read()
         image2_data = await image2.read()
 
-        img1 = preprocess_image(image1_data)
-        img2 = preprocess_image(image2_data)
+        scores = {}
+        weights = {}
 
-        # Use encoder + cosine similarity (more reliable than siamese comparison head)
-        emb1 = encoder_model.predict(img1, verbose=0)[0]
-        emb2 = encoder_model.predict(img2, verbose=0)[0]
-        similarity_score = float(np.dot(emb1, emb2))  # Cosine sim (vectors are L2-normalized)
+        # ResNet50 similarity (luggage-specific, higher weight)
+        resnet_emb1 = get_resnet_embedding(image1_data)
+        resnet_emb2 = get_resnet_embedding(image2_data)
+        if resnet_emb1 and resnet_emb2:
+            resnet_sim = float(np.dot(resnet_emb1, resnet_emb2))
+            scores["resnet50"] = round(resnet_sim, 4)
+            weights["resnet50"] = 0.6
+
+        # CLIP similarity (general visual, complementary)
+        clip_emb1 = get_clip_embedding(image1_data)
+        clip_emb2 = get_clip_embedding(image2_data)
+        if clip_emb1 and clip_emb2:
+            clip_sim = float(np.dot(clip_emb1, clip_emb2))
+            scores["clip"] = round(clip_sim, 4)
+            weights["clip"] = 0.4
+
+        # Ensemble score (weighted average)
+        if scores:
+            total_weight = sum(weights[k] for k in scores)
+            ensemble_score = sum(scores[k] * weights[k] for k in scores) / total_weight
+        else:
+            raise HTTPException(status_code=503, detail="No models available for comparison")
 
         return {
             "image1": image1.filename,
             "image2": image2.filename,
-            "similarity_score": round(similarity_score, 4),
-            "match": "Found match" if similarity_score > 0.85 else "Not a match",
-            "model": "resnet50_encoder_cosine"
+            "ensemble_score": round(ensemble_score, 4),
+            "individual_scores": scores,
+            "weights": {k: weights[k] for k in scores},
+            "match": "Found match" if ensemble_score > 0.85 else "Not a match",
+            "model": "resnet50_clip_ensemble"
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error comparing images: {str(e)}")
 
@@ -283,35 +390,43 @@ async def match_batch(
 ):
     """
     Compare a lost luggage image against a batch of found images.
-
-    Returns:
-        Ranked list of matches sorted by similarity score.
+    Uses ensemble scoring for best results.
     """
-    if not encoder_model:
-        raise HTTPException(status_code=503, detail="Encoder model not loaded.")
+    if not resnet_encoder and not clip_model:
+        raise HTTPException(status_code=503, detail="No models loaded")
 
     try:
-        # Encode the lost image
         lost_data = await lost_image.read()
-        lost_array = preprocess_image(lost_data)
-        lost_embedding = encoder_model.predict(lost_array, verbose=0)[0]
+        lost_resnet = get_resnet_embedding(lost_data)
+        lost_clip = get_clip_embedding(lost_data)
 
-        # Encode and compare each found image
         matches = []
         for i, found_img in enumerate(found_images):
             found_data = await found_img.read()
-            found_array = preprocess_image(found_data)
-            found_embedding = encoder_model.predict(found_array, verbose=0)[0]
+            found_resnet = get_resnet_embedding(found_data)
+            found_clip = get_clip_embedding(found_data)
 
-            # Cosine similarity (vectors are L2-normalized)
-            similarity = float(np.dot(lost_embedding, found_embedding))
+            # Ensemble score
+            scores = {}
+            if lost_resnet and found_resnet:
+                scores["resnet50"] = float(np.dot(lost_resnet, found_resnet))
+            if lost_clip and found_clip:
+                scores["clip"] = float(np.dot(lost_clip, found_clip))
+
+            weights = {"resnet50": 0.6, "clip": 0.4}
+            if scores:
+                total_w = sum(weights.get(k, 0.5) for k in scores)
+                ensemble = sum(scores[k] * weights.get(k, 0.5) for k in scores) / total_w
+            else:
+                ensemble = 0.0
+
             matches.append({
                 "image_id": found_img.filename or f"found_{i}",
-                "similarity_score": round(similarity, 4)
+                "ensemble_score": round(ensemble, 4),
+                "individual_scores": {k: round(v, 4) for k, v in scores.items()}
             })
 
-        # Sort by similarity (highest first)
-        matches.sort(key=lambda x: x["similarity_score"], reverse=True)
+        matches.sort(key=lambda x: x["ensemble_score"], reverse=True)
 
         return {
             "lost_image": lost_image.filename,
@@ -326,21 +441,20 @@ async def match_batch(
 
 @app.post("/extract-features")
 async def extract_features(image: UploadFile = File(...)):
-    """
-    Extract feature embedding from a single image.
-    Alias for /embed endpoint with different response format.
-    """
-    if not encoder_model:
-        raise HTTPException(status_code=503, detail="Encoder model not loaded.")
+    """Extract feature embedding from a single image (alias for /embed)"""
+    if not resnet_encoder and not clip_model:
+        raise HTTPException(status_code=503, detail="No models loaded")
 
     try:
         image_data = await image.read()
-        img_array = preprocess_image(image_data)
-        features = encoder_model.predict(img_array, verbose=0)
+        resnet_emb = get_resnet_embedding(image_data)
+        clip_emb = get_clip_embedding(image_data)
 
         return {
-            "features": features[0].tolist(),
-            "shape": list(features.shape)
+            "features": resnet_emb or clip_emb,
+            "resnet_features": resnet_emb,
+            "clip_features": clip_emb,
+            "shape": [1, RESNET_EMBEDDING_DIM]
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
