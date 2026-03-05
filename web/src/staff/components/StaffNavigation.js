@@ -57,6 +57,12 @@ export default function StaffNavigation() {
               Matches
             </Link>
             <Link
+              to="/staff/claims"
+              className="text-white drop-shadow-md font-medium text-sm transition-colors hover:text-blue-300"
+            >
+              Claims
+            </Link>
+            <Link
               to="/staff/users"
               className="text-white drop-shadow-md font-medium text-sm transition-colors hover:text-blue-300"
             >
@@ -127,6 +133,12 @@ export default function StaffNavigation() {
               className="block px-4 py-2 text-white rounded transition-colors hover:bg-slate-700"
             >
               Matches
+            </Link>
+            <Link
+              to="/staff/claims"
+              className="block px-4 py-2 text-white rounded transition-colors hover:bg-slate-700"
+            >
+              Claims
             </Link>
             <Link
               to="/staff/users"

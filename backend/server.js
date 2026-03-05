@@ -51,6 +51,8 @@ app.use('/api/luggage', require('./routes/luggage'));
 app.use('/api/matches', require('./routes/matches'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/flight-route', require('./routes/flightRoute'));
+app.use('/api/claims', require('./routes/claims'));
+app.use('/api/staff', require('./routes/staff'));
 
 // Health Check
 app.get('/health', (req, res) => {
